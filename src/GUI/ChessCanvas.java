@@ -26,6 +26,9 @@ public class ChessCanvas extends JPanel {
     private ChessPosition mousePointer; //the pointer on the board pointing to a cell
     private Point mousePosition;    //the actual mouse position
 
+    private boolean boardRepaintNeeded = true;
+    private Image boardAndPiecesBackup;
+
     public ChessCanvas(Handler handler) {
         this.setPreferredSize(new Dimension(8 * cellWidth, 8 * cellWidth));
         this.handler = handler;
@@ -40,20 +43,35 @@ public class ChessCanvas extends JPanel {
         Graphics offg = offscreen.getGraphics();
         offg.setColor(Color.BLACK);
         offg.fillRect(0,0, d.width, d.height);
-        //redraw
-        paintField(offg);
-        //draw king red if checked
-        drawKingCheck(offg);
-        //draw the pieces
-        Set<Piece> pieces = new HashSet<>(handler.getPieces()); //to avoid concurrent modification exceptions
-        synchronized (pieces) {
-            pieces.forEach(p -> p.draw(offg));
+
+        if (boardRepaintNeeded) {
+            redrawBoard(offg);  //draw the board on the original offscreen canvas
+            boardAndPiecesBackup = createImage(d.width, d.height);
+            Graphics backupGraphics = boardAndPiecesBackup.getGraphics();
+            redrawBoard(backupGraphics);    //and draw the board on the backup
+            boardRepaintNeeded = false;
+        } else {
+            offg.drawImage(boardAndPiecesBackup, 0, 0, this);
         }
+
 
         drawPointer(offg);
         drawSelectedPiece(offg);
         //copy to real screen
         g.drawImage(offscreen, 0, 0, this);
+    }
+
+    private void redrawBoard(Graphics g) {
+        //redraw
+        paintField(g);
+        //draw king red if checked
+        drawKingCheck(g);
+        //draw the pieces
+        Set<Piece> pieces = new HashSet<>(handler.getPieces()); //to avoid concurrent modification exceptions
+        synchronized (pieces) {
+            pieces.forEach(p -> p.draw(g));
+        }
+
     }
 
     public int getCellWidth() {
@@ -200,6 +218,13 @@ public class ChessCanvas extends JPanel {
 
     public void setSelectedPiece(Piece p) {
         this.selected = p;
+    }
+
+    /**
+     * Request that the board should be repainted. The repaint will be done in the next call of paintComponent
+     */
+    public void requestBoardRepaint() {
+        boardRepaintNeeded = true;
     }
 
 }

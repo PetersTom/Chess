@@ -47,11 +47,6 @@ public class HumanPlayer extends Player {
                 canvas.setSelectedPiece(selected);
             }
         } else {    //there is a piece selected
-            if (clickedPiece == selected) { //place back if clicked on the same spot
-                selected = null;
-                canvas.setSelectedPiece(null);
-                return;
-            }
             Set<Move> possibleMoves = selected.getMovesWithCheck();
             //There could be multiple possible moves in case of a pawn promotion
             Set<Move> optionalMoves = possibleMoves.stream().filter(m -> m.getPosition().equals(clicked)).collect(Collectors.toSet());
@@ -65,6 +60,10 @@ public class HumanPlayer extends Player {
                 move = toReturn;
                 selected = null;
                 canvas.setSelectedPiece(selected);
+            } else { //clicked on a non-move spot, so place back the piece
+                selected = null;
+                canvas.setSelectedPiece(null);
+                return;
             }
         }
     }

@@ -184,6 +184,7 @@ public class Engine implements Runnable {
         while(true) {
             if (hasToStop) break; //It should stop when it needs to.
             //do a repaint
+            canvas.requestBoardRepaint();
             canvas.repaint();
             if (whiteTurn) { //when it is white's turn
                 if (!playerThreadRunning) { //check if the white thread is already running
@@ -195,6 +196,7 @@ public class Engine implements Runnable {
                 if (m != null) { //if there is a move
                     m.execute(); //execute it
                     updateMoves(); //update the possible moves for the new state
+                    canvas.requestBoardRepaint(); //a piece has moved, so the pieces should be redrawn
                     try { //try joining the player thread, as it has executed his job
                         playerThread.join();
                         playerThreadRunning = false;
@@ -212,6 +214,7 @@ public class Engine implements Runnable {
                 if (m != null) {
                     m.execute();
                     updateMoves();
+                    canvas.requestBoardRepaint();
                     try {
                         playerThread.join();
                         playerThreadRunning = false;
@@ -222,9 +225,11 @@ public class Engine implements Runnable {
             }
             if (handler.getWhiteKing().isMated()) {
                 JOptionPane.showMessageDialog(getFrame(), "White lost");
+                stop();
             }
             if (handler.getBlackKing().isMated()) {
                 JOptionPane.showMessageDialog(getFrame(), "Black lost");
+                stop();
             }
         }
     }
