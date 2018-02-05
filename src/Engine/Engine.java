@@ -186,41 +186,30 @@ public class Engine implements Runnable {
             //do a repaint
             canvas.requestBoardRepaint();
             canvas.repaint();
-            if (whiteTurn) { //when it is white's turn
-                if (!playerThreadRunning) { //check if the white thread is already running
+            if (!playerThreadRunning) { //check if the player thread is already running
+                if (whiteTurn) {
                     playerThread = new Thread(whitePlayer); //if not, make a new thread and start it
-                    playerThread.start();
-                    playerThreadRunning = true;
-                }
-                Move m = whitePlayer.fetchMove(); //try to fetch the move white makes
-                if (m != null) { //if there is a move
-                    m.execute(); //execute it
-                    updateMoves(); //update the possible moves for the new state
-                    canvas.requestBoardRepaint(); //a piece has moved, so the pieces should be redrawn
-                    try { //try joining the player thread, as it has executed his job
-                        playerThread.join();
-                        playerThreadRunning = false;
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {    //blackTurn
-                if (!playerThreadRunning) {
+                } else {
                     playerThread = new Thread(blackPlayer);
-                    playerThread.start();
-                    playerThreadRunning = true;
                 }
-                Move m = blackPlayer.fetchMove();
-                if (m != null) {
-                    m.execute();
-                    updateMoves();
-                    canvas.requestBoardRepaint();
-                    try {
-                        playerThread.join();
-                        playerThreadRunning = false;
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                playerThread.start();
+                playerThreadRunning = true;
+            }
+            Move m;
+            if (whiteTurn) {
+                m = whitePlayer.fetchMove(); //try to fetch the move white makes
+            } else {
+                m = blackPlayer.fetchMove();
+            }
+            if (m != null) { //if there is a move
+                m.execute(); //execute it
+                updateMoves(); //update the possible moves for the new state
+                canvas.requestBoardRepaint(); //a piece has moved, so the pieces should be redrawn
+                try { //try joining the player thread, as it has executed his job
+                    playerThread.join();
+                    playerThreadRunning = false;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
             if (handler.getWhiteKing().isMated()) {
