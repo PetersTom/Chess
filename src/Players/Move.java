@@ -53,6 +53,7 @@ public class Move {
             handler.removePiece(capturedPiece);
         }
         e.changeTurn();
+        handler.updateMovesWithoutCheck();
     }
 
     /**
@@ -66,6 +67,7 @@ public class Move {
             handler.addPiece(capturedPiece);
         }
         e.changeTurn();
+        handler.updateMovesWithoutCheck();
     }
 
     /**
@@ -74,10 +76,19 @@ public class Move {
      */
     public void tryMove() {
         p.moveTo(end);
+        if (capturedPiece != null) {
+            handler.removePiece(capturedPiece); //if the king takes a piece that is protected by one of the opposite color, he should still be checked.
+                                                //when not removing the piece, the moves of the protecting piece would not cover this square
+        }
+        handler.updateMovesWithoutCheck();
     }
 
     public void unTryMove() {
         p.moveTo(start);
+        if (capturedPiece != null) {
+            handler.addPiece(capturedPiece);
+        }
+        handler.updateMovesWithoutCheck();
     }
 
     @Override

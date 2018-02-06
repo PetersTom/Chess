@@ -17,26 +17,20 @@ public class Engine implements Runnable {
 
     public static final int CELL_AMOUNT = 8;
 
-    JFrame frame;
-    ChessCanvas canvas;
-    JPanel chessPanel;
+    private JFrame frame;
+    private ChessCanvas canvas;
 
     private int standardCellWidth = 100;
 
-    Handler handler;
-    boolean whiteTurn = true;
+    private Handler handler;
+    private boolean whiteTurn = true;
 
-    Player whitePlayer;
-    Player blackPlayer;
-    Move lastMove; //used for en-passent
-    //to be updated after every move. To prevent continuous fetching of moves.
-    Set<Move> whitePlayerMoves; //every move of the white player
-    Set<Move> blackPlayerMoves;
-    Set<Move> whitePlayerMovesWithCheck; //every valid move of the white player (that will not result in check)
-    Set<Move> blackPlayerMovesWithCheck;
+    private Player whitePlayer;
+    private Player blackPlayer;
+    private Move lastMove; //used for en-passent
 
-    Thread t;
-    volatile boolean hasToStop = false;
+    private Thread t;
+    private volatile boolean hasToStop = false;
 
     public Engine() {
 
@@ -86,7 +80,7 @@ public class Engine implements Runnable {
             }
         });
 
-        chessPanel = new JPanel();
+        JPanel chessPanel = new JPanel();
         chessPanel.add(canvas);
         chessPanel.setBackground(Color.BLACK);
 
@@ -119,7 +113,7 @@ public class Engine implements Runnable {
     /**
      * To be called when the window closes. Cleans up threads and exits the program.
      */
-    public void exitProcedure() {
+    private void exitProcedure() {
         stop();
         System.exit(0);
     }
@@ -127,7 +121,7 @@ public class Engine implements Runnable {
     /**
      * Start the game loop
      */
-    public void start() {
+    private void start() {
         t = new Thread(this);
         t.start();
     }
@@ -135,7 +129,7 @@ public class Engine implements Runnable {
     /**
      * Stop the game loop
      */
-    public void stop() {
+    private void stop() {
         hasToStop = true;
         try {
             t.join();
@@ -145,9 +139,9 @@ public class Engine implements Runnable {
         }
     }
 
-    public void initializeGame() {
+    private void initializeGame() {
         whitePlayer = new HumanPlayer(ChessColor.White, this);
-        blackPlayer = new RandomPlayer(ChessColor.Black, this);
+        blackPlayer = new HumanPlayer(ChessColor.Black, this);
         handler.addPiece(new Rook(new ChessPosition(1,1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Rook(new ChessPosition(8, 1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Knight(new ChessPosition(2, 1, canvas), ChessColor.White, standardCellWidth, this));
@@ -170,15 +164,15 @@ public class Engine implements Runnable {
         for (int i = 1; i <= 8; i++) {
             handler.addPiece(new Pawn(new ChessPosition(i, 7, canvas), ChessColor.Black, standardCellWidth, this));
         }
-        updateMoves();
+        handler.updateMoves();
         start();
     }
 
     /**
      * The game loop
      */
-    Thread playerThread; //The thread that executes the players
-    boolean playerThreadRunning = false;
+    private Thread playerThread; //The thread that executes the players
+    private boolean playerThreadRunning = false;
     @Override
     public void run() {
         while(true) {
@@ -203,7 +197,7 @@ public class Engine implements Runnable {
             }
             if (m != null) { //if there is a move
                 m.execute(); //execute it
-                updateMoves(); //update the possible moves for the new state
+                handler.updateMoves(); //update the possible moves for the new state
                 canvas.requestBoardRepaint(); //a piece has moved, so the pieces should be redrawn
                 try { //try joining the player thread, as it has executed his job
                     playerThread.join();
@@ -247,7 +241,6 @@ public class Engine implements Runnable {
 
     /**
      * Returns whether or  not a human is playing currently
-     * @return
      */
     public boolean humanTurn() {
         if (whiteTurn && whitePlayer instanceof HumanPlayer) {
@@ -257,55 +250,5 @@ public class Engine implements Runnable {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Updates the moves for every player. This happens whenever someone executes a move. To prevent continous calculation of the moves.
-     */
-    public void updateMoves() {
-        whitePlayerMoves = new HashSet<>();
-        blackPlayerMoves = new HashSet<>();
-        whitePlayerMovesWithCheck = new HashSet<>();
-        blackPlayerMovesWithCheck =  new HashSet<>();
-        Set<Piece> whitePieces = handler.getPieces(ChessColor.White);
-        for (Piece p : whitePieces) {
-            whitePlayerMoves.addAll(p.getMoves());
-            whitePlayerMovesWithCheck.addAll(p.getMovesWithCheck());
-        }
-        Set<Piece> blackPieces = handler.getPieces(ChessColor.Black);
-        for (Piece p : blackPieces) {
-            blackPlayerMoves.addAll(p.getMoves());
-            blackPlayerMovesWithCheck.addAll((p.getMovesWithCheck()));
-        }
-    }
-
-    public Set<Move> getMoves(ChessColor c) {
-        if (c == ChessColor.Black) {
-            return this.blackPlayerMoves;
-        } else {
-            return this.whitePlayerMoves;
-        }
-    }
-    public Set<Move> getMovesWithCheck(ChessColor c) {
-        if (c == ChessColor.Black) {
-            return this.blackPlayerMovesWithCheck;
-        } else {
-            return this.whitePlayerMovesWithCheck;
-        }
-    }
-
-    public Set<Move> getOppositeColorMoves(ChessColor c) {
-        if (c == ChessColor.Black) {
-            return whitePlayerMoves;
-        } else {
-            return blackPlayerMoves;
-        }
-    }
-    public Set<Move> getOppositeColorMovesWithCheck(ChessColor c) {
-        if (c == ChessColor.Black) {
-            return whitePlayerMovesWithCheck;
-        } else {
-            return blackPlayerMovesWithCheck;
-        }
     }
 }

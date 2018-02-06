@@ -68,10 +68,7 @@ public class ChessCanvas extends JPanel {
         drawKingCheck(g);
         //draw the pieces
         Set<Piece> pieces = new HashSet<>(handler.getPieces()); //to avoid concurrent modification exceptions
-        synchronized (pieces) {
-            pieces.forEach(p -> p.draw(g));
-        }
-
+        pieces.forEach(p -> p.draw(g));
     }
 
     public int getCellWidth() {

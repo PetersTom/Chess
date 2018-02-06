@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import Engine.Engine;
+import Engine.*;
 
 public class King extends Piece {
 
@@ -92,7 +92,7 @@ public class King extends Piece {
                     }
                 }
             }
-        } else { //
+        } else { //black
             Set<ChessPosition> otherMovePositions = getOtherPiecesMovePositions();
             if (this.getPosition().x == 5 && this.getPosition().y == 8) { //basePosition
                 Piece p = handler.getPiece(8, 8); //short castling
@@ -140,16 +140,11 @@ public class King extends Piece {
      * @return
      */
     private Set<ChessPosition> getOtherPiecesMovePositions() {
-        return e.getOppositeColorMoves(this.getColor()).stream().map(Move::getPosition).collect(Collectors.toSet());
+        return handler.getOppositeColorMoves(this.getColor()).stream().map(Move::getPosition).collect(Collectors.toSet());
     }
 
     public boolean isChecked() {
-        Set<Piece> otherColorPieces = handler.getOppositeColorPieces(this.getColor());
-        Set<Move> otherColorMoves = new HashSet<>();
-        for (Piece p : otherColorPieces) {
-            otherColorMoves.addAll(p.getMoves());
-        }
-//        Set<Move> otherColorMoves = e.getOppositeColorMoves(this.getColor());
+        Set<Move> otherColorMoves = handler.getOppositeColorMoves(this.getColor()); //these are always up-to-date because Move udpates it every time
         for (Move m : otherColorMoves) {
             if (m.getPosition().equals(this.getPosition())) {
                 return true;
@@ -159,7 +154,7 @@ public class King extends Piece {
     }
 
     public boolean isMated() {
-        Set<Move> possibleMoves = e.getMovesWithCheck(this.getColor());
+        Set<Move> possibleMoves = handler.getMovesWithCheck(this.getColor());
         if (isChecked() && possibleMoves.isEmpty()) {
             return true;
         }
