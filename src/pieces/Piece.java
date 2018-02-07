@@ -16,13 +16,13 @@ public abstract class Piece {
     private ChessPosition position;
 
     private ChessColor color;
-    protected int cellWidth;
+    int cellWidth;
     protected Handler handler;
     protected ChessCanvas canvas;
-    protected String file = "";
+    String file = "";
     protected Engine e;
-    Image img;
-    protected boolean moved; //whether or not this piece has already moved. Used for castling check.
+    private Image img;
+    private boolean moved; //whether or not this piece has already moved. Used for castling check.
 
     public Piece(ChessPosition p, ChessColor c, int standardCellWidth, Engine e) {
         this.position = p;
@@ -33,11 +33,13 @@ public abstract class Piece {
         this.canvas = e.getCanvas();
     }
 
-    protected void setupImg() {
+    void setupImg() {
         try {
             URL u = getClass().getClassLoader().getResource(file);
+            assert u != null;   //Assume the resource is there, if it is not, exceptions will occur, but that is alright,
+                                //because when that happens, the application cannot start anyways.
             img = ImageIO.read(u);
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             System.err.println("Can't read " + file);
             e.printStackTrace();
         }
@@ -59,13 +61,11 @@ public abstract class Piece {
 
     /**
      * Returns all possible moves without checking if there exists a check if the move is played.
-     * @return
      */
     public abstract Set<Move> getMoves();
 
     /**
      * Returns all possible moves while checking for check if the move would be played.
-     * @return
      */
     public Set<Move> getMovesWithCheck() {
         Set<Move> possibleMoves = getMoves();
@@ -84,6 +84,8 @@ public abstract class Piece {
     public void draw(Graphics g) {
         int drawX = position.getPositionOnCanvas().x;
         int drawY = position.getPositionOnCanvas().y;
+        //This is a square and the width is the same as the height, therefore, the code is correct and the warning suppressed.
+        //noinspection SuspiciousNameCombination
         g.drawImage(img, drawX, drawY, cellWidth, cellWidth, null);
     }
 
