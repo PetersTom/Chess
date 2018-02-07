@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 public class Handler {
     //needs to be volatile, because both the game loop and window updates can access at the same time.
     volatile private Set<Piece> pieces;
+    private boolean whiteTurn = true;
+
     private ChessCanvas canvas;
     private Engine e;
 
@@ -170,6 +172,13 @@ public class Handler {
     }
 
     /**
+     * Changes the turn. If it was white's Turn, it is now black's turn and the other way arround.
+     */
+    public void changeTurn() {
+        whiteTurn = !whiteTurn;
+    }
+
+    /**
      * Returns a new Handler instance. All pieces are copied as well, so that a modification to one of the handler's pieces
      * does not affect the pieces of the other handler.
      * @return
@@ -192,7 +201,6 @@ public class Handler {
     }
 
     public synchronized boolean isWhiteToMove() {
-        throw new NotImplementedException();
-        //TODO: refractor who is to move to the handler instead of keeping it in the Engine
+        return whiteTurn;
     }
 }

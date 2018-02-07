@@ -58,10 +58,11 @@ public class AlphaBetaPlayer extends Player {
     private int alphaBeta(ChessNode node, int alpha, int beta, int depth, int maxSearchDepth)
             throws AITimeLimitExceededException {
         if (node.getHandler().isWhiteToMove()) {
-            return alphaBetaMax(node, alpha, beta, depth, maxSearchDepth);
+           // return alphaBetaMax(node, alpha, beta, depth, maxSearchDepth);
         } else  {
-            return alphaBetaMin(node, alpha, beta, depth, maxSearchDepth);
+            //return alphaBetaMin(node, alpha, beta, depth, maxSearchDepth);
         }
+        return 0;
     }
 
 }

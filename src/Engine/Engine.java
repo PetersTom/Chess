@@ -23,7 +23,6 @@ public class Engine implements Runnable {
     private int standardCellWidth = 100;
 
     private Handler handler;
-    private boolean whiteTurn = true;
 
     private Player whitePlayer;
     private Player blackPlayer;
@@ -62,7 +61,7 @@ public class Engine implements Runnable {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-                if (whiteTurn) {
+                if (handler.isWhiteToMove()) {
                     whitePlayer.mousePressed(e);
                 } else {
                     blackPlayer.mousePressed(e);
@@ -181,7 +180,7 @@ public class Engine implements Runnable {
             canvas.requestBoardRepaint();
             canvas.repaint();
             if (!playerThreadRunning) { //check if the player thread is already running
-                if (whiteTurn) {
+                if (handler.isWhiteToMove()) {
                     playerThread = new Thread(whitePlayer); //if not, make a new thread and start it
                 } else {
                     playerThread = new Thread(blackPlayer);
@@ -190,7 +189,7 @@ public class Engine implements Runnable {
                 playerThreadRunning = true;
             }
             Move m;
-            if (whiteTurn) {
+            if (handler.isWhiteToMove()) {
                 m = whitePlayer.fetchMove(); //try to fetch the move white makes
             } else {
                 m = blackPlayer.fetchMove();
@@ -235,18 +234,14 @@ public class Engine implements Runnable {
         return this.lastMove;
     }
 
-    public void changeTurn() {
-        whiteTurn = !whiteTurn;
-    }
-
     /**
      * Returns whether or  not a human is playing currently
      */
     public boolean humanTurn() {
-        if (whiteTurn && whitePlayer instanceof HumanPlayer) {
+        if (handler.isWhiteToMove() && whitePlayer instanceof HumanPlayer) {
             return true;
         }
-        if (!whiteTurn && blackPlayer instanceof HumanPlayer) {
+        if (!handler.isWhiteToMove() && blackPlayer instanceof HumanPlayer) {
             return true;
         }
         return false;

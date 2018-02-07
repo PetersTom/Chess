@@ -52,7 +52,7 @@ public class Move {
         if (capturedPiece != null) {
             handler.removePiece(capturedPiece);
         }
-        e.changeTurn();
+        handler.changeTurn();
         handler.updateMovesWithoutCheck();
     }
 
@@ -66,7 +66,7 @@ public class Move {
         if (capturedPiece != null) {
             handler.addPiece(capturedPiece);
         }
-        e.changeTurn();
+        handler.changeTurn();
         handler.updateMovesWithoutCheck();
     }
 
