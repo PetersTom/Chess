@@ -21,6 +21,11 @@ public class Knight extends Piece {
     }
 
     @Override
+    public Piece copy() {
+        return new Knight(this.getPosition(), this.getColor(), cellWidth, e);
+    }
+
+    @Override
     public Set<Move> getMoves() {
         Set<ChessPosition> possibleMoves = new HashSet<>();
         int x = getPosition().x;

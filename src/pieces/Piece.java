@@ -33,19 +33,6 @@ public abstract class Piece {
         this.canvas = e.getCanvas();
     }
 
-    /**
-     * A clone constructor
-     * @param p
-     */
-    public Piece(Piece p) {
-        this.position = p.position;
-        this.color = p.color;
-        this.cellWidth = p.cellWidth;
-        this.e = p.e;
-        this.handler = p.handler;
-        this.canvas = p.canvas;
-    }
-
     protected void setupImg() {
         try {
             URL u = getClass().getClassLoader().getResource(file);
@@ -55,6 +42,8 @@ public abstract class Piece {
             e.printStackTrace();
         }
     }
+
+    public abstract Piece copy();
 
     public ChessColor getColor() {
         return this.color;

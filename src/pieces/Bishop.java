@@ -20,6 +20,11 @@ public class Bishop extends Piece {
         setupImg();
     }
 
+    @Override
+    public Piece copy() {
+        return new Bishop(this.getPosition(), this.getColor(), cellWidth, e);
+    }
+
 
     @Override
     public Set<Move> getMoves() {

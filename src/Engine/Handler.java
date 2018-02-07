@@ -6,6 +6,7 @@ import pieces.ChessColor;
 import pieces.ChessPosition;
 import pieces.King;
 import pieces.Piece;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ public class Handler {
     //needs to be volatile, because both the game loop and window updates can access at the same time.
     volatile private Set<Piece> pieces;
     private ChessCanvas canvas;
+    private Engine e;
 
     //to be updated after every move. To prevent continuous fetching of moves.
     private Set<Move> whitePlayerMoves; //every move of the white player
@@ -25,6 +27,7 @@ public class Handler {
     private Set<Move> blackPlayerMovesWithCheck;
 
     public Handler(Engine e) {
+        this.e = e;
         pieces = Collections.synchronizedSet(new HashSet<>());
         canvas = e.getCanvas();
     }
@@ -50,7 +53,7 @@ public class Handler {
      * Get all pieces.
      */
     public Set<Piece> getPieces() {
-        return this.pieces;
+        return new HashSet<>(this.pieces);
     }
 
     /**
@@ -166,5 +169,30 @@ public class Handler {
         }
     }
 
+    /**
+     * Returns a new Handler instance. All pieces are copied as well, so that a modification to one of the handler's pieces
+     * does not affect the pieces of the other handler.
+     * @return
+     */
+    public synchronized Handler deepCopy() {
+        Set<Piece> piecesCopy = Collections.synchronizedSet(new HashSet<>());
+        for (Piece p : pieces) {
+            piecesCopy.add(p.copy());
+        }
+        Handler handlerCopy = new Handler(e);
+        handlerCopy.setPieces(piecesCopy);
+        return handlerCopy;
+    }
 
+    /**
+     * A helper method for the deepCopy(). Sets the pieces of the copied handler to the copied pieces
+     */
+    private synchronized void setPieces(Set<Piece> p) {
+        this.pieces = p;
+    }
+
+    public synchronized boolean isWhiteToMove() {
+        throw new NotImplementedException();
+        //TODO: refractor who is to move to the handler instead of keeping it in the Engine
+    }
 }

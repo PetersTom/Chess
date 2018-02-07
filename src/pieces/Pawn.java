@@ -22,6 +22,11 @@ public class Pawn extends Piece {
     }
 
     @Override
+    public Piece copy() {
+        return new Pawn(this.getPosition(), this.getColor(), cellWidth, e);
+    }
+
+    @Override
     public Set<Move> getMoves() {
         Set<ChessPosition> possibleChessPositions = new HashSet<>();
         Set<Move> possibleMoves = new HashSet<>();

@@ -20,6 +20,11 @@ public class Queen extends Piece {
         setupImg();
     }
 
+    @Override
+    public Piece copy() {
+        return new Queen(this.getPosition(), this.getColor(), cellWidth, e);
+    }
+
 
     /**
      * Continuously making new objects is a lot of overhead, but it is easy to code and insightful, if
