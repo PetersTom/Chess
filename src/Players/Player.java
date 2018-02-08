@@ -56,6 +56,7 @@ public abstract class Player implements Runnable {
         Move move = null;
         Set<Move> possibleMoves = handler.getMovesWithCheck(getColor());
         int size = possibleMoves.size();
+        if (size == 0) return null; //in case the system has not yet found out that there is a mate.
         int number = r.nextInt(size);
         int i = 0;
         for (Move m : possibleMoves) {

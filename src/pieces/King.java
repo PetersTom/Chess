@@ -20,6 +20,8 @@ public class King extends Piece {
             file += "wKing.png";
         }
         setupImg();
+        pieceValue = 0; //the king has no real value, as it cannot be taken anyway. It could be set to infinity, but
+                        //overflow issues would arise when computing the overall piece value.
     }
 
     @Override

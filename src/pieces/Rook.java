@@ -17,6 +17,10 @@ public class Rook extends Piece {
             file += "wRook.png";
         }
         setupImg();
+        pieceValue = 5;
+        if (c == ChessColor.Black) {
+            pieceValue = -5;
+        }
     }
 
     @Override

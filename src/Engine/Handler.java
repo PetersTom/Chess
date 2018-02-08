@@ -54,7 +54,7 @@ public class Handler {
     /**
      * Get all pieces.
      */
-    public Set<Piece> getPieces() {
+    public synchronized Set<Piece> getPieces() {
         return new HashSet<>(this.pieces);
     }
 
@@ -190,6 +190,10 @@ public class Handler {
         }
         Handler handlerCopy = new Handler(e);
         handlerCopy.setPieces(piecesCopy);
+        handlerCopy.whitePlayerMoves = this.whitePlayerMoves;
+        handlerCopy.whitePlayerMovesWithCheck = this.whitePlayerMovesWithCheck;
+        handlerCopy.blackPlayerMoves = this.blackPlayerMoves;
+        handlerCopy.blackPlayerMovesWithCheck = this.blackPlayerMovesWithCheck;
         return handlerCopy;
     }
 
@@ -202,5 +206,13 @@ public class Handler {
 
     public synchronized boolean isWhiteToMove() {
         return whiteTurn;
+    }
+
+    public boolean blackMated() {
+        return getBlackKing().isMated();
+    }
+
+    public boolean whiteMated() {
+        return getWhiteKing().isMated();
     }
 }

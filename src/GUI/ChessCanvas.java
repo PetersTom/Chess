@@ -195,20 +195,6 @@ public class ChessCanvas extends JPanel {
         g.fillOval(drawPoint.x + cellWidth/2 - circleRadius, drawPoint.y + cellWidth/2 - circleRadius, circleRadius*2, circleRadius*2);
     }
 
-    /**
-     * toggles the color. Helpermethod for paintField
-     * @param g
-     */
-    private void toggleColor(Graphics g) {
-        if (g.getColor() == darkBrown) {
-            g.setColor(lightBrown);
-        } else if (g.getColor() == lightBrown){
-            g.setColor(darkBrown);
-        } else {
-            g.setColor(lightBrown); //first call
-        }
-    }
-
     public void setCellWidth(int cellWidth) {
         this.cellWidth = cellWidth;
     }

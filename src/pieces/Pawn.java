@@ -19,6 +19,10 @@ public class Pawn extends Piece {
             file += "wPawn.png";
         }
         setupImg();
+        pieceValue = 1;
+        if (c == ChessColor.Black) {
+            pieceValue = -1;
+        }
     }
 
     @Override

@@ -53,7 +53,7 @@ public class Move {
             handler.removePiece(capturedPiece);
         }
         handler.changeTurn();
-        handler.updateMovesWithoutCheck();
+        handler.updateMoves();
     }
 
     /**
@@ -67,7 +67,7 @@ public class Move {
             handler.addPiece(capturedPiece);
         }
         handler.changeTurn();
-        handler.updateMovesWithoutCheck();
+        handler.updateMoves();
     }
 
     /**

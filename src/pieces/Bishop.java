@@ -18,6 +18,10 @@ public class Bishop extends Piece {
             file += "wBishop.png";
         }
         setupImg();
+        pieceValue = 3;
+        if (c == ChessColor.Black) {
+            pieceValue = -3;
+        }
     }
 
     @Override

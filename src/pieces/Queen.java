@@ -18,6 +18,10 @@ public class Queen extends Piece {
             file += "wQueen.png";
         }
         setupImg();
+        pieceValue = 9;
+        if (c == ChessColor.Black) {
+            pieceValue = -9;
+        }
     }
 
     @Override

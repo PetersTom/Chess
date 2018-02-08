@@ -1,12 +1,14 @@
 package Engine;
 
 import GUI.ChessCanvas;
+import Players.AI.AlphaBetaPlayer;
 import Players.AI.RandomPlayer;
 import Players.HumanPlayer;
 import Players.Move;
 import Players.Player;
 import pieces.*;
 
+import javax.sql.rowset.serial.SerialRef;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -139,8 +141,8 @@ public class Engine implements Runnable {
     }
 
     private void initializeGame() {
-        whitePlayer = new HumanPlayer(ChessColor.White, this);
-        blackPlayer = new HumanPlayer(ChessColor.Black, this);
+        whitePlayer = new RandomPlayer(ChessColor.White, this);
+        blackPlayer = new RandomPlayer(ChessColor.Black, this);
         handler.addPiece(new Rook(new ChessPosition(1,1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Rook(new ChessPosition(8, 1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Knight(new ChessPosition(2, 1, canvas), ChessColor.White, standardCellWidth, this));
@@ -188,28 +190,35 @@ public class Engine implements Runnable {
                 playerThread.start();
                 playerThreadRunning = true;
             }
+
             Move m;
             if (handler.isWhiteToMove()) {
                 m = whitePlayer.fetchMove(); //try to fetch the move white makes
             } else {
                 m = blackPlayer.fetchMove();
             }
+
             if (m != null) { //if there is a move
+
                 m.execute(); //execute it
-                handler.updateMoves(); //update the possible moves for the new state
+
                 canvas.requestBoardRepaint(); //a piece has moved, so the pieces should be redrawn
+
                 try { //try joining the player thread, as it has executed his job
                     playerThread.join();
                     playerThreadRunning = false;
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+
             }
-            if (handler.getWhiteKing().isMated()) {
+
+            if (handler.whiteMated()) {
                 JOptionPane.showMessageDialog(getFrame(), "White lost");
                 stop();
             }
-            if (handler.getBlackKing().isMated()) {
+            if (handler.blackMated()) {
                 JOptionPane.showMessageDialog(getFrame(), "Black lost");
                 stop();
             }

@@ -23,6 +23,7 @@ public abstract class Piece {
     protected Engine e;
     private Image img;
     private boolean moved; //whether or not this piece has already moved. Used for castling check.
+    int pieceValue; //A value for the piece, used in calculating the value of a certain position
 
     public Piece(ChessPosition p, ChessColor c, int standardCellWidth, Engine e) {
         this.position = p;
@@ -43,6 +44,10 @@ public abstract class Piece {
             System.err.println("Can't read " + file);
             e.printStackTrace();
         }
+    }
+
+    public int getPieceValue() {
+        return this.pieceValue;
     }
 
     public abstract Piece copy();

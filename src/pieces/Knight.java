@@ -18,6 +18,10 @@ public class Knight extends Piece {
             file += "wKnight.png";
         }
         setupImg();
+        pieceValue = 3;
+        if (c == ChessColor.Black) {
+            pieceValue = -3;
+        }
     }
 
     @Override
