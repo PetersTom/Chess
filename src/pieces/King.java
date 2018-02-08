@@ -3,6 +3,9 @@ package pieces;
 import Players.Castling;
 import Players.Move;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,18 +13,40 @@ import java.util.stream.Stream;
 
 import Engine.*;
 
+import javax.imageio.ImageIO;
+
 public class King extends Piece {
+
+    private static Image wimg;
+    private static Image bimg;
 
     public King(ChessPosition p, ChessColor c, int cellWidth, Engine e) {
         super(p, c, cellWidth, e);
-        if (c == ChessColor.Black) {
-            file += "bKing.png";
-        } else {
-            file += "wKing.png";
+        if (wimg == null && bimg == null) {
+            try {
+                URL u = getClass().getClassLoader().getResource("wKing.png");
+                assert u != null;   //Assume the resource is there, if it is not, exceptions will occur, but that is alright,
+                //because when that happens, the application cannot start anyways.
+                wimg = ImageIO.read(u);
+                u = getClass().getClassLoader().getResource("bKing.png");
+                assert u != null;
+                bimg = ImageIO.read(u);
+            } catch (IOException | IllegalArgumentException ex) {
+                System.err.println("Can't read King image");
+                ex.printStackTrace();
+            }
         }
-        setupImg();
         pieceValue = 0; //the king has no real value, as it cannot be taken anyway. It could be set to infinity, but
                         //overflow issues would arise when computing the overall piece value.
+    }
+
+    @Override
+    public Image getImg() {
+        if (this.getColor() == ChessColor.White) {
+            return King.wimg;
+        } else {
+            return King.bimg;
+        }
     }
 
     @Override

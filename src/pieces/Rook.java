@@ -3,23 +3,47 @@ package pieces;
 import Engine.Engine;
 import Players.Move;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Rook extends Piece {
 
+    private static Image wimg;
+    private static Image bimg;
+
     public Rook(ChessPosition p, ChessColor c, int cellWidth, Engine e) {
         super(p, c, cellWidth, e);
-        if (c == ChessColor.Black) {
-            file += "bRook.png";
-        } else {
-            file += "wRook.png";
+        if (wimg == null && bimg == null) {
+            try {
+                URL u = getClass().getClassLoader().getResource("wRook.png");
+                assert u != null;   //Assume the resource is there, if it is not, exceptions will occur, but that is alright,
+                //because when that happens, the application cannot start anyways.
+                wimg = ImageIO.read(u);
+                u = getClass().getClassLoader().getResource("bRook.png");
+                assert u != null;
+                bimg = ImageIO.read(u);
+            } catch (IOException | IllegalArgumentException ex) {
+                System.err.println("Can't read Queen image");
+                ex.printStackTrace();
+            }
         }
-        setupImg();
         pieceValue = 5;
         if (c == ChessColor.Black) {
             pieceValue = -5;
+        }
+    }
+
+    @Override
+    public Image getImg() {
+        if (this.getColor() == ChessColor.White) {
+            return Rook.wimg;
+        } else {
+            return Rook.bimg;
         }
     }
 

@@ -2,26 +2,52 @@ package pieces;
 
 import Players.Move;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import Engine.Engine;
 import Players.PawnPromotion;
+import javafx.util.Pair;
+
+import javax.imageio.ImageIO;
 
 public class Pawn extends Piece {
 
+    private static Image wimg;
+    private static Image bimg;
+
     public Pawn(ChessPosition p, ChessColor c, int cellWidth, Engine e) {
         super(p, c, cellWidth, e);
-        if (c == ChessColor.Black) {
-            file += "bPawn.png";
-        } else {
-            file += "wPawn.png";
+        if (wimg == null && bimg == null) {
+            try {
+                URL u = getClass().getClassLoader().getResource("wPawn.png");
+                assert u != null;   //Assume the resource is there, if it is not, exceptions will occur, but that is alright,
+                //because when that happens, the application cannot start anyways.
+                wimg = ImageIO.read(u);
+                u = getClass().getClassLoader().getResource("bPawn.png");
+                assert u != null;
+                bimg = ImageIO.read(u);
+            } catch (IOException | IllegalArgumentException ex) {
+                System.err.println("Can't read Pawn image");
+                ex.printStackTrace();
+            }
         }
-        setupImg();
         pieceValue = 1;
         if (c == ChessColor.Black) {
             pieceValue = -1;
+        }
+    }
+
+    @Override
+    public Image getImg() {
+        if (this.getColor() == ChessColor.White) {
+            return Pawn.wimg;
+        } else {
+            return Pawn.bimg;
         }
     }
 

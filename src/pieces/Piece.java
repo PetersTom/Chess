@@ -1,16 +1,23 @@
 package pieces;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.awt.*;
 import Engine.Engine;
 import Engine.Handler;
 import GUI.ChessCanvas;
 import Players.Move;
 
+/**
+ * A class representing a Piece. It contains information about its color, position and if it has already moved.
+ * The images corresponding to the pieces are fetched from the resources once in the constructors of
+ * the respective classes.
+ */
 public abstract class Piece {
 
     private ChessPosition position;
@@ -19,9 +26,7 @@ public abstract class Piece {
     int cellWidth;
     protected Handler handler;
     protected ChessCanvas canvas;
-    String file = "";
     protected Engine e;
-    private Image img;
     private boolean moved; //whether or not this piece has already moved. Used for castling check.
     int pieceValue; //A value for the piece, used in calculating the value of a certain position
 
@@ -32,18 +37,6 @@ public abstract class Piece {
         this.e = e;
         this.handler = e.getHandler();
         this.canvas = e.getCanvas();
-    }
-
-    void setupImg() {
-        try {
-            URL u = getClass().getClassLoader().getResource(file);
-            assert u != null;   //Assume the resource is there, if it is not, exceptions will occur, but that is alright,
-                                //because when that happens, the application cannot start anyways.
-            img = ImageIO.read(u);
-        } catch (IOException | IllegalArgumentException e) {
-            System.err.println("Can't read " + file);
-            e.printStackTrace();
-        }
     }
 
     public int getPieceValue() {
@@ -91,12 +84,10 @@ public abstract class Piece {
         int drawY = position.getPositionOnCanvas().y;
         //This is a square and the width is the same as the height, therefore, the code is correct and the warning suppressed.
         //noinspection SuspiciousNameCombination
-        g.drawImage(img, drawX, drawY, cellWidth, cellWidth, null);
+        g.drawImage(getImg(), drawX, drawY, cellWidth, cellWidth, null);
     }
 
-    public Image getImg() {
-        return this.img;
-    }
+    public abstract Image getImg();
 
     public void setMoved(boolean m) {
         this.moved = m;
