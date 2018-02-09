@@ -113,7 +113,7 @@ public class Engine implements Runnable {
     /**
      * To be called when the window closes. Cleans up threads and exits the program.
      */
-    private void exitProcedure() {
+    public void exitProcedure() {
         stop();
         System.exit(0);
     }
@@ -141,7 +141,7 @@ public class Engine implements Runnable {
 
     private void initializeGame() {
         whitePlayer = new HumanPlayer(ChessColor.White, this);
-        blackPlayer = new AlphaBetaPlayer(ChessColor.Black, this);
+        blackPlayer = new HumanPlayer(ChessColor.Black, this);
         handler.addPiece(new Rook(new ChessPosition(1,1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Rook(new ChessPosition(8, 1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Knight(new ChessPosition(2, 1, canvas), ChessColor.White, standardCellWidth, this));
@@ -215,11 +215,11 @@ public class Engine implements Runnable {
 
             if (handler.whiteMated()) {
                 JOptionPane.showMessageDialog(getFrame(), "White lost");
-                stop(); //block on this to finish, but it will not finish. it will wait for itself?
+                break;
             }
             if (handler.blackMated()) {
                 JOptionPane.showMessageDialog(getFrame(), "Black lost");
-                stop();
+                break;
             }
         }
     }
@@ -245,5 +245,17 @@ public class Engine implements Runnable {
             return true;
         }
         return false;
+    }
+
+    public boolean isAlive() {
+        return t.isAlive();
+    }
+
+    public void join() {
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
