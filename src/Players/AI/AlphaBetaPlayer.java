@@ -60,7 +60,7 @@ public class AlphaBetaPlayer extends Player {
      **/
     private int alphaBeta(ChessNode node, int alpha, int beta, int depth, int maxSearchDepth)
             throws AITimeLimitExceededException {
-        if (node.getHandler().isWhiteToMove()) {
+        if (this.getColor() == ChessColor.White) {  //if the player is white, do max, if it is black, do min
             return alphaBetaMax(node, alpha, beta, depth, maxSearchDepth);
         } else  {
             return alphaBetaMin(node, alpha, beta, depth, maxSearchDepth);
@@ -71,7 +71,7 @@ public class AlphaBetaPlayer extends Player {
             throws AITimeLimitExceededException {
         //Stop if maximum running time is exceeded.
         if (System.currentTimeMillis()- startTime > maxRunningTime) {
-            throw new AITimeLimitExceededException();
+            //throw new AITimeLimitExceededException();
         }
 
         Handler handler = node.getHandler();
@@ -91,9 +91,9 @@ public class AlphaBetaPlayer extends Player {
         Set<Move> moves = handler.getMovesWithCheck(ChessColor.Black);
 
         //while there are still moves to evaluate
-        for (Move move : moves) {
+        for (Move m : moves) {
             //get the state that corresponds to the move that we are going to evaluate
-            move.execute(); //changes the handler
+            m.execute(); //changes the handler
             ChessNode newNode = new ChessNode(handler.deepCopy());  //make a new node with a copy of the handler
             //check the child nodes and set the best move accordingly
             int recursiveCall;
@@ -103,13 +103,13 @@ public class AlphaBetaPlayer extends Player {
                 recursiveCall = alphaBetaMax(newNode, alpha, beta, depth + 1, maxSearchDepth);
             }
             //undo the move for the next one. Changes the handler.
-            move.undo();
+            m.undo();
 
             //Checks if the value of the childnode is such that changes are necessary to alpha and beta
             if (recursiveCall < beta) {
                 beta = recursiveCall;
                 if (depth == 0) {
-                    node.setBestMove(move);
+                    node.setBestMove(m);
                 }
                 if (beta <= alpha) {
                     return alpha;
@@ -123,7 +123,7 @@ public class AlphaBetaPlayer extends Player {
             throws AITimeLimitExceededException {
         //Stop if maximum running time is exceeded.
         if (System.currentTimeMillis()- startTime > maxRunningTime) {
-            throw new AITimeLimitExceededException();
+            //throw new AITimeLimitExceededException();
         }
 
         Handler handler = node.getHandler();
@@ -143,9 +143,9 @@ public class AlphaBetaPlayer extends Player {
         Set<Move> moves = handler.getMovesWithCheck(ChessColor.White);
 
         //while there are still moves to evaluate
-        for (Move move : moves) {
+        for (Move m : moves) {
             //get the state that corresponds to the move that we are going to evaluate
-            move.execute(); //changes the handler
+            m.execute(); //changes the handler
             ChessNode newNode = new ChessNode(handler.deepCopy());
             //check the child nodes and set the best move accordingly
             int recursiveCall;
@@ -155,13 +155,13 @@ public class AlphaBetaPlayer extends Player {
                 recursiveCall = alphaBetaMin(newNode, alpha, beta, depth + 1, maxSearchDepth);
             }
             //undo the move again to make sure the state is ready for the next one
-            move.undo();
+            m.undo();
 
             //check if the value of the child node is such that changes are necessary to alpha or beta.
             if (recursiveCall > alpha) {
                 alpha = recursiveCall;
                 if (depth == 0) {
-                    node.setBestMove(move);
+                    node.setBestMove(m);
                 }
                 if (beta <= alpha) {
                     return beta;
@@ -177,7 +177,7 @@ public class AlphaBetaPlayer extends Player {
      * @return
      */
     private int evaluate(Handler handler) {
-        System.err.println("value: " + countPiecesValue(handler));
+        //System.err.println("value: " + countPiecesValue(handler));
         return countPiecesValue(handler);
     }
 

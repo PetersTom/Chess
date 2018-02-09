@@ -141,7 +141,7 @@ public class Engine implements Runnable {
 
     private void initializeGame() {
         whitePlayer = new HumanPlayer(ChessColor.White, this);
-        blackPlayer = new HumanPlayer(ChessColor.Black, this);
+        blackPlayer = new AlphaBetaPlayer(ChessColor.Black, this);
         handler.addPiece(new Rook(new ChessPosition(1,1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Rook(new ChessPosition(8, 1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Knight(new ChessPosition(2, 1, canvas), ChessColor.White, standardCellWidth, this));

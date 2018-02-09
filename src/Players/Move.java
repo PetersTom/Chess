@@ -19,6 +19,8 @@ public class Move {
     boolean alreadyMoved; //if the piece had already moved or not.
     Move previousLastMove;
 
+    private boolean executed; //states whether or not this move has been executed or not
+
     public Move(Piece p, ChessPosition end, Piece capture, Engine e) {
         this.p = p;
         this.end = end;
@@ -43,9 +45,11 @@ public class Move {
     }
 
     /**
-     * Executes the move
+     * Executes the move. It cannot already been executed
      */
     public void execute() {
+        if (executed) throw new IllegalArgumentException();
+        executed = true;
         p.setMoved(true);
         p.moveTo(end);
         handler.setLastMove(this);
@@ -57,9 +61,11 @@ public class Move {
     }
 
     /**
-     * Reverts the move if already done
+     * Reverts the move if already done. Can only be called if execute() has been called before.
      */
     public void undo() {
+        if (!executed) throw new IllegalArgumentException();
+        executed = false;
         p.setMoved(alreadyMoved);
         p.moveTo(start);
         handler.setLastMove(previousLastMove);
