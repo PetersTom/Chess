@@ -26,7 +26,7 @@ public class Move {
         this.capturedPiece = capture;
         this.e = e;
         this.handler = e.getHandler();
-        this.previousLastMove = e.getLastMove();
+        this.previousLastMove = handler.getLastMove();
         this.alreadyMoved = p.hasMoved();
     }
 
@@ -48,7 +48,7 @@ public class Move {
     public void execute() {
         p.setMoved(true);
         p.moveTo(end);
-        e.setLastMove(this);
+        handler.setLastMove(this);
         if (capturedPiece != null) {
             handler.removePiece(capturedPiece);
         }
@@ -62,7 +62,7 @@ public class Move {
     public void undo() {
         p.setMoved(alreadyMoved);
         p.moveTo(start);
-        e.setLastMove(previousLastMove);
+        handler.setLastMove(previousLastMove);
         if (capturedPiece != null) {
             handler.addPiece(capturedPiece);
         }

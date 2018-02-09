@@ -28,7 +28,6 @@ public class Engine implements Runnable {
 
     private Player whitePlayer;
     private Player blackPlayer;
-    private Move lastMove; //used for en-passent
 
     private Thread t;
     private volatile boolean hasToStop = false;
@@ -75,8 +74,8 @@ public class Engine implements Runnable {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                    if (lastMove != null)
-                        lastMove.undo();
+                    if (handler.isLastMove())
+                        handler.undoLastMove();
                 }
             }
         });
@@ -141,8 +140,8 @@ public class Engine implements Runnable {
     }
 
     private void initializeGame() {
-        whitePlayer = new RandomPlayer(ChessColor.White, this);
-        blackPlayer = new RandomPlayer(ChessColor.Black, this);
+        whitePlayer = new HumanPlayer(ChessColor.White, this);
+        blackPlayer = new AlphaBetaPlayer(ChessColor.Black, this);
         handler.addPiece(new Rook(new ChessPosition(1,1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Rook(new ChessPosition(8, 1, canvas), ChessColor.White, standardCellWidth, this));
         handler.addPiece(new Knight(new ChessPosition(2, 1, canvas), ChessColor.White, standardCellWidth, this));
@@ -216,7 +215,7 @@ public class Engine implements Runnable {
 
             if (handler.whiteMated()) {
                 JOptionPane.showMessageDialog(getFrame(), "White lost");
-                stop();
+                stop(); //block on this to finish, but it will not finish. it will wait for itself?
             }
             if (handler.blackMated()) {
                 JOptionPane.showMessageDialog(getFrame(), "Black lost");
@@ -233,14 +232,6 @@ public class Engine implements Runnable {
 
     public Handler getHandler() {
         return this.handler;
-    }
-
-    public void setLastMove(Move m) {
-        this.lastMove = m;
-    }
-
-    public Move getLastMove() {
-        return this.lastMove;
     }
 
     /**

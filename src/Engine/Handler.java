@@ -28,6 +28,8 @@ public class Handler {
     private Set<Move> whitePlayerMovesWithCheck; //every valid move of the white player (that will not result in check)
     private Set<Move> blackPlayerMovesWithCheck;
 
+    private Move lastMove; //used for en-passent
+
     public Handler(Engine e) {
         this.e = e;
         pieces = Collections.synchronizedSet(new HashSet<>());
@@ -214,5 +216,21 @@ public class Handler {
 
     public boolean whiteMated() {
         return getWhiteKing().isMated();
+    }
+
+    public boolean isLastMove() {
+        return lastMove != null;
+    }
+
+    public void undoLastMove() {
+        lastMove.undo();
+    }
+
+    public void setLastMove(Move m) {
+        this.lastMove = m;
+    }
+
+    public Move getLastMove() {
+        return this.lastMove;
     }
 }

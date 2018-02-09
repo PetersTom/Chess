@@ -86,7 +86,7 @@ public class Pawn extends Piece {
             }
             //en-passent
             if (y == 5) {
-                Move lastMove = e.getLastMove();
+                Move lastMove = handler.getLastMove();
                 Piece pawn = handler.getPiece(x+1, y);
                 if (pawn != null) {
                     if (pawn.equals(lastMove.getPiece())) { //if the piece next has moved last
@@ -128,7 +128,7 @@ public class Pawn extends Piece {
             }
             //en-passent
             if (y == 4) {
-                Move lastMove = e.getLastMove();
+                Move lastMove = handler.getLastMove();
                 Piece pawn = handler.getPiece(x+1, y);
                 if (pawn != null) {
                     if (pawn.equals(lastMove.getPiece())) { //if the piece next has moved last
