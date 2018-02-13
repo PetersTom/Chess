@@ -20,8 +20,8 @@ public class King extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public King(ChessPosition p, ChessColor c, int cellWidth, Engine e) {
-        super(p, c, cellWidth, e);
+    public King(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
+        super(p, c, cellWidth, e, h);
         if (wimg == null && bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wKing.png");
@@ -50,8 +50,8 @@ public class King extends Piece {
     }
 
     @Override
-    public Piece copy() {
-        return new King(this.getPosition(), this.getColor(), cellWidth, e);
+    public Piece copy(Handler h) {
+        return new King(this.getPosition(), this.getColor(), cellWidth, e, h);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class King extends Piece {
         //remove out of bounds
         Stream<ChessPosition> chessPositionStream = possiblePositions.stream().filter(p -> p.x > 0 && p.x <= Engine.CELL_AMOUNT && p.y > 0 && p.y <= Engine.CELL_AMOUNT);
         Set<ChessPosition> possiblePositionsWithinBounds = chessPositionStream.collect(Collectors.toSet());
-        Set<Move> possibleMoves = possiblePositionsWithinBounds.stream().map(m -> new Move(this, m, handler.getPiece(m), e)).collect(Collectors.toSet());
+        Set<Move> possibleMoves = possiblePositionsWithinBounds.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet());
 
         return possibleMoves;
     }
@@ -100,7 +100,7 @@ public class King extends Piece {
                                 if (!otherMovePositions.contains(new ChessPosition(6,1, canvas))) { //check if going over on on a checked square
                                     if (!otherMovePositions.contains(new ChessPosition(7, 1, canvas))) {
                                         castlingMoves.add(new Castling(this, new ChessPosition(7, 1, canvas),
-                                                r, new ChessPosition(6, 1, canvas), e));
+                                                r, new ChessPosition(6, 1, canvas), e, this.handler.getLastMove()));
                                     }
                                 }
                             }
@@ -116,7 +116,7 @@ public class King extends Piece {
                                 if (!otherMovePositions.contains(new ChessPosition(3, 1, canvas))) {    //not going over a checked square
                                     if (!otherMovePositions.contains(new ChessPosition(4, 1, canvas))) {
                                         castlingMoves.add(new Castling(this, new ChessPosition(3, 1, canvas),
-                                                    r, new ChessPosition(4, 1, canvas), e));
+                                                    r, new ChessPosition(4, 1, canvas), e, this.handler.getLastMove()));
                                     }
                                 }
                             }
@@ -137,7 +137,7 @@ public class King extends Piece {
                                 if (!otherMovePositions.contains(new ChessPosition(6, 8, canvas))) {
                                     if (!otherMovePositions.contains(new ChessPosition(7, 8, canvas))) {
                                         castlingMoves.add(new Castling(this, new ChessPosition(7, 8, canvas),
-                                                r, new ChessPosition(6, 8, canvas), e));
+                                                r, new ChessPosition(6, 8, canvas), e, this.handler.getLastMove()));
                                     }
                                 }
                             }
@@ -153,7 +153,7 @@ public class King extends Piece {
                                 if (!otherMovePositions.contains(new ChessPosition(3, 8, canvas))) {
                                     if (!otherMovePositions.contains(new ChessPosition(4, 8, canvas))) {
                                         castlingMoves.add(new Castling(this, new ChessPosition(3, 8, canvas),
-                                                    r, new ChessPosition(4, 8, canvas), e));
+                                                    r, new ChessPosition(4, 8, canvas), e, this.handler.getLastMove()));
                                     }
                                 }
                             }
@@ -172,13 +172,13 @@ public class King extends Piece {
      * @return
      */
     private Set<ChessPosition> getOtherPiecesMovePositions() {
-        return handler.getOppositeColorMoves(this.getColor()).stream().map(Move::getPosition).collect(Collectors.toSet());
+        return handler.getOppositeColorMoves(this.getColor()).stream().map(Move::getEndPosition).collect(Collectors.toSet());
     }
 
     public boolean isChecked() {
         Set<Move> otherColorMoves = handler.getOppositeColorMoves(this.getColor()); //these are always up-to-date because Move udpates it every time
         for (Move m : otherColorMoves) {
-            if (m.getPosition().equals(this.getPosition())) {
+            if (m.getEndPosition().equals(this.getPosition())) {
                 return true;
             }
         }

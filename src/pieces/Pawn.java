@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import Engine.Engine;
+import Engine.*;
 import Players.PawnPromotion;
 import javafx.util.Pair;
 
@@ -20,8 +20,8 @@ public class Pawn extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public Pawn(ChessPosition p, ChessColor c, int cellWidth, Engine e) {
-        super(p, c, cellWidth, e);
+    public Pawn(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
+        super(p, c, cellWidth, e, h);
         if (wimg == null && bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wPawn.png");
@@ -52,8 +52,8 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public Piece copy() {
-        return new Pawn(this.getPosition(), this.getColor(), cellWidth, e);
+    public Piece copy(Handler h) {
+        return new Pawn(this.getPosition(), this.getColor(), cellWidth, e, h);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class Pawn extends Piece {
                 if (pawn != null) {
                     if (pawn.equals(lastMove.getPiece())) { //if the piece next has moved last
                         if (new ChessPosition(x + 1, y + 2, canvas).equals(lastMove.getStartPosition())) {  //and it did a double step
-                            possibleMoves.add(new Move(this, new ChessPosition(x + 1, y + 1, canvas), pawn, e));
+                            possibleMoves.add(new Move(this, new ChessPosition(x + 1, y + 1, canvas), pawn, e, this.handler.getLastMove()));
                         }
                     }
                 }
@@ -99,7 +99,7 @@ public class Pawn extends Piece {
                 if (pawn != null) {
                     if (pawn.equals(lastMove.getPiece())) {
                         if (new ChessPosition(x - 1, y + 2, canvas).equals(lastMove.getStartPosition())) {
-                            possibleMoves.add(new Move(this, new ChessPosition(x - 1, y + 1, canvas), pawn, e));
+                            possibleMoves.add(new Move(this, new ChessPosition(x - 1, y + 1, canvas), pawn, e, this.handler.getLastMove()));
                         }
                     }
                 }
@@ -133,7 +133,7 @@ public class Pawn extends Piece {
                 if (pawn != null) {
                     if (pawn.equals(lastMove.getPiece())) { //if the piece next has moved last
                         if (new ChessPosition(x + 1, y - 2, canvas).equals(lastMove.getStartPosition())) {  //and it did a double step
-                            possibleMoves.add(new Move(this, new ChessPosition(x + 1, y - 1, canvas), pawn, e));
+                            possibleMoves.add(new Move(this, new ChessPosition(x + 1, y - 1, canvas), pawn, e, this.handler.getLastMove()));
                         }
                     }
                 }
@@ -141,7 +141,7 @@ public class Pawn extends Piece {
                 if (pawn != null) {
                     if (pawn.equals(lastMove.getPiece())) {
                         if (new ChessPosition(x - 1, y - 2, canvas).equals(lastMove.getStartPosition())) {
-                            possibleMoves.add(new Move(this, new ChessPosition(x - 1, y - 1, canvas), pawn, e));
+                            possibleMoves.add(new Move(this, new ChessPosition(x - 1, y - 1, canvas), pawn, e, this.handler.getLastMove()));
                         }
                     }
                 }
@@ -159,21 +159,21 @@ public class Pawn extends Piece {
         for (ChessPosition p : promotions) {
             promotionMoves.addAll(getPromotions(p));
         }
-        possibleMoves.addAll(possibleChessPositions.stream().map(m -> new Move(this, m, handler.getPiece(m), e)).collect(Collectors.toSet()));
+        possibleMoves.addAll(possibleChessPositions.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet()));
         possibleMoves.addAll(promotionMoves);
         return possibleMoves;
     }
 
     private Set<Move> getPromotions(ChessPosition p) {
-        Queen queen = new Queen(p, this.getColor(), cellWidth, e);
-        Knight knight = new Knight(p, this.getColor(), cellWidth, e);
-        Rook rook = new Rook(p, this.getColor(), cellWidth, e);
-        Bishop bishop = new Bishop(p, this.getColor(), cellWidth, e);
+        Queen queen = new Queen(p, this.getColor(), cellWidth, e, handler);
+        Knight knight = new Knight(p, this.getColor(), cellWidth, e, handler);
+        Rook rook = new Rook(p, this.getColor(), cellWidth, e, handler);
+        Bishop bishop = new Bishop(p, this.getColor(), cellWidth, e, handler);
         Set<Move> promotions = new HashSet<>();
-        promotions.add(new PawnPromotion(this, p, handler.getPiece(p), e, queen));
-        promotions.add(new PawnPromotion(this, p, handler.getPiece(p), e, knight));
-        promotions.add(new PawnPromotion(this, p, handler.getPiece(p), e, rook));
-        promotions.add(new PawnPromotion(this, p, handler.getPiece(p), e, bishop));
+        promotions.add(new PawnPromotion(this, p, handler.getPiece(p), e, this.handler.getLastMove(), queen));
+        promotions.add(new PawnPromotion(this, p, handler.getPiece(p), e, this.handler.getLastMove(), knight));
+        promotions.add(new PawnPromotion(this, p, handler.getPiece(p), e, this.handler.getLastMove(), rook));
+        promotions.add(new PawnPromotion(this, p, handler.getPiece(p), e, this.handler.getLastMove(), bishop));
         return promotions;
     }
 }

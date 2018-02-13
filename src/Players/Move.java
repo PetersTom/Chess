@@ -11,7 +11,6 @@ public class Move {
     Piece p;    //piece to move
     ChessPosition end;    //new position
     Piece capturedPiece; //can be null
-    Handler handler;
     Engine e;
 
     //values used for return
@@ -21,14 +20,13 @@ public class Move {
 
     private boolean executed; //states whether or not this move has been executed or not
 
-    public Move(Piece p, ChessPosition end, Piece capture, Engine e) {
+    public Move(Piece p, ChessPosition end, Piece capture, Engine e, Move previousLastMove) {
         this.p = p;
         this.end = end;
         this.start = p.getPosition();
         this.capturedPiece = capture;
         this.e = e;
-        this.handler = e.getHandler();
-        this.previousLastMove = handler.getLastMove();
+        this.previousLastMove = previousLastMove;
         this.alreadyMoved = p.hasMoved();
     }
 
@@ -36,7 +34,7 @@ public class Move {
         return this.p;
     }
 
-    public ChessPosition getPosition() {
+    public ChessPosition getEndPosition() {
         return end;
     }
 
@@ -47,7 +45,7 @@ public class Move {
     /**
      * Executes the move. It cannot already been executed
      */
-    public void execute() {
+    public void execute(Handler handler) {
         if (executed) throw new IllegalArgumentException();
         executed = true;
         p.setMoved(true);
@@ -63,7 +61,7 @@ public class Move {
     /**
      * Reverts the move if already done. Can only be called if execute() has been called before.
      */
-    public void undo() {
+    public void undo(Handler handler) {
         if (!executed) throw new IllegalArgumentException();
         executed = false;
         p.setMoved(alreadyMoved);
@@ -80,7 +78,7 @@ public class Move {
      * Try a move out to check if the new position leads to a check on this side.
      * Should always be followed by an unTryMove().
      */
-    public void tryMove() {
+    public void tryMove(Handler handler) {
         p.moveTo(end);
         if (capturedPiece != null) {
             handler.removePiece(capturedPiece); //if the king takes a piece that is protected by one of the opposite color, he should still be checked.
@@ -89,12 +87,27 @@ public class Move {
         handler.updateMovesWithoutCheck();
     }
 
-    public void unTryMove() {
+    public void unTryMove(Handler handler) {
         p.moveTo(start);
         if (capturedPiece != null) {
             handler.addPiece(capturedPiece);
         }
         handler.updateMovesWithoutCheck();
+    }
+
+    public boolean isExecuted() {
+        return this.executed;
+    }
+
+    /**
+     * Returns a copy of this, with a different handler and a different piece. This is used when copying the handler.
+     */
+    public Move copy(Handler h, Piece p) {
+        //not needed to copy the move before this one, as that would trigger a butterfly affect rippling down every lastMove.
+        Move copyMove = new Move(p, this.end, h.getPiece(end), this.e, null);
+        copyMove.start = this.start;
+        copyMove.alreadyMoved = this.alreadyMoved;
+        return copyMove;
     }
 
     @Override

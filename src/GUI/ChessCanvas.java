@@ -180,7 +180,7 @@ public class ChessCanvas extends JPanel {
     private void drawPossibleMoves(Graphics g) {
         if (selected == null) return;
         Set<Move> moves = selected.getMovesWithCheck();
-        moves.forEach(m -> drawDot(g, m.getPosition()));
+        moves.forEach(m -> drawDot(g, m.getEndPosition()));
     }
 
     /**

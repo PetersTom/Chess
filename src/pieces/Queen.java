@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import Engine.Engine;
+import Engine.*;
 
 import javax.imageio.ImageIO;
 
@@ -18,8 +18,8 @@ public class Queen extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public Queen(ChessPosition p, ChessColor c, int cellWidth, Engine e) {
-        super(p, c, cellWidth, e);
+    public Queen(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
+        super(p, c, cellWidth, e, h);
         if (wimg == null && bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wQueen.png");
@@ -50,8 +50,8 @@ public class Queen extends Piece {
     }
 
     @Override
-    public Piece copy() {
-        return new Queen(this.getPosition(), this.getColor(), cellWidth, e);
+    public Piece copy(Handler h) {
+        return new Queen(this.getPosition(), this.getColor(), cellWidth, e, h);
     }
 
 
@@ -66,11 +66,11 @@ public class Queen extends Piece {
     @Override
     public Set<Move> getMoves() {
 //        Set<Move> possibleMoves =  new HashSet<>();
-//        Piece bishop = new Bishop(this.getPosition(), this.getColor(), this.cellWidth, e);
+//        Piece bishop = new Bishop(this.getEndPosition(), this.getColor(), this.cellWidth, e);
 //        possibleMoves.addAll(bishop.getMoves());
-//        Piece rook = new Rook(this.getPosition(), this.getColor(), this.cellWidth, e);
+//        Piece rook = new Rook(this.getEndPosition(), this.getColor(), this.cellWidth, e);
 //        possibleMoves.addAll(rook.getMoves());
-//        return possibleMoves.stream().map(m -> new Move(this, m.getPosition(), handler.getPiece(m.getPosition()), e)).collect(Collectors.toSet());
+//        return possibleMoves.stream().map(m -> new Move(this, m.getEndPosition(), handler.getPiece(m.getEndPosition()), e)).collect(Collectors.toSet());
 
         Set<ChessPosition> possibleMoves = new HashSet<>();
         int x = getPosition().x;
@@ -172,6 +172,6 @@ public class Queen extends Piece {
         }
 
 
-        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e)).collect(Collectors.toSet());
+        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet());
     }
 }

@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import Engine.Engine;
+import Engine.*;
 
 import javax.imageio.ImageIO;
 import java.awt.Image;
@@ -20,8 +20,8 @@ public class Bishop extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public Bishop(ChessPosition p, ChessColor c, int cellWidth, Engine e) {
-        super(p, c, cellWidth, e);
+    public Bishop(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
+        super(p, c, cellWidth, e, h);
         if (wimg == null && bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wBishop.png");
@@ -52,8 +52,8 @@ public class Bishop extends Piece {
     }
 
     @Override
-    public Piece copy() {
-        return new Bishop(this.getPosition(), this.getColor(), cellWidth, e);
+    public Piece copy(Handler h) {
+        return new Bishop(this.getPosition(), this.getColor(), cellWidth, e, h);
     }
 
 
@@ -110,6 +110,6 @@ public class Bishop extends Piece {
             possibleMoves.add(new ChessPosition(x+i, y-i, canvas));
             i++;
         }
-        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e)).collect(Collectors.toSet());
+        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet());
     }
 }

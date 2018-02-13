@@ -42,6 +42,13 @@ public abstract class Player implements Runnable {
     }
 
     /**
+     * Returns true if there is a move to fetch, false otherwise.
+     */
+    public boolean isMove() {
+        return move != null;
+    }
+
+    /**
      * To be overriden when a specific player type needs to check the mouse
      * @param e
      */
@@ -62,6 +69,7 @@ public abstract class Player implements Runnable {
         for (Move m : possibleMoves) {
             if (i == number) {
                 move = m;
+                break;
             }
             i++;
         }

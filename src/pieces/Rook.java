@@ -1,6 +1,6 @@
 package pieces;
 
-import Engine.Engine;
+import Engine.*;
 import Players.Move;
 
 import javax.imageio.ImageIO;
@@ -16,8 +16,8 @@ public class Rook extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public Rook(ChessPosition p, ChessColor c, int cellWidth, Engine e) {
-        super(p, c, cellWidth, e);
+    public Rook(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
+        super(p, c, cellWidth, e, h);
         if (wimg == null && bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wRook.png");
@@ -48,8 +48,8 @@ public class Rook extends Piece {
     }
 
     @Override
-    public Piece copy() {
-        return new Rook(this.getPosition(), this.getColor(), cellWidth, e);
+    public Piece copy(Handler h) {
+        return new Rook(this.getPosition(), this.getColor(), cellWidth, e, h);
     }
 
     @Override
@@ -101,6 +101,6 @@ public class Rook extends Piece {
             possibleMoves.add(new ChessPosition(x, i, canvas));
         }
 
-        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e)).collect(Collectors.toSet());
+        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet());
     }
 }

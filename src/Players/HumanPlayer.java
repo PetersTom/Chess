@@ -12,9 +12,7 @@ import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class HumanPlayer extends Player {
 
@@ -49,7 +47,7 @@ public class HumanPlayer extends Player {
         } else {    //there is a piece selected
             Set<Move> possibleMoves = selected.getMovesWithCheck();
             //There could be multiple possible moves in case of a pawn promotion
-            Set<Move> optionalMoves = possibleMoves.stream().filter(m -> m.getPosition().equals(clicked)).collect(Collectors.toSet());
+            Set<Move> optionalMoves = possibleMoves.stream().filter(m -> m.getEndPosition().equals(clicked)).collect(Collectors.toSet());
             //clicked on a possible move
             Iterator<Move> iterator = optionalMoves.iterator();
             if (iterator.hasNext()) {   //there is at least one move

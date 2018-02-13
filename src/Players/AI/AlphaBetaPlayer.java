@@ -16,7 +16,7 @@ import static java.lang.Integer.MIN_VALUE;
 public class AlphaBetaPlayer extends Player {
 
     private int bestValue;
-    private final int maxSearchDepth = 3; //the initial search depth
+    private final int maxSearchDepth = 2; //the initial search depth
     private final long maxRunningTime = 10000; //10 seconds
     private long startTime;
 
@@ -43,8 +43,10 @@ public class AlphaBetaPlayer extends Player {
         } catch (AITimeLimitExceededException e) { /* just here to catch the exception and to stop if needed */ }
 
         if (bestMove == null) { //no move found yet
-            move = getRandomValidMove(handler); //set the move to be fetched to a random move
+            Move temp = getRandomValidMove(handler); //set the move to be fetched to a random move
+            move = temp;
         } else {
+            //TODO: move is not set correctly or something with the fetching is wrong.
             move = bestMove;    //set the move to be fetched to the best move uptill now
         }
     }
@@ -62,16 +64,17 @@ public class AlphaBetaPlayer extends Player {
             throws AITimeLimitExceededException {
         if (this.getColor() == ChessColor.White) {  //if the player is white, do max, if it is black, do min
             return alphaBetaMax(node, alpha, beta, depth, maxSearchDepth);
-        } else  {
+        } else {
             return alphaBetaMin(node, alpha, beta, depth, maxSearchDepth);
         }
     }
 
     private int alphaBetaMin(ChessNode node, int alpha, int beta, int depth, int maxSearchDepth)
             throws AITimeLimitExceededException {
+        System.err.println("depth: " + depth);
         //Stop if maximum running time is exceeded.
         if (System.currentTimeMillis()- startTime > maxRunningTime) {
-            //throw new AITimeLimitExceededException();
+            throw new AITimeLimitExceededException();
         }
 
         Handler handler = node.getHandler();
@@ -93,7 +96,7 @@ public class AlphaBetaPlayer extends Player {
         //while there are still moves to evaluate
         for (Move m : moves) {
             //get the state that corresponds to the move that we are going to evaluate
-            m.execute(); //changes the handler
+            handler.execute(m); //changes the handler
             ChessNode newNode = new ChessNode(handler.deepCopy());  //make a new node with a copy of the handler
             //check the child nodes and set the best move accordingly
             int recursiveCall;
@@ -103,7 +106,7 @@ public class AlphaBetaPlayer extends Player {
                 recursiveCall = alphaBetaMax(newNode, alpha, beta, depth + 1, maxSearchDepth);
             }
             //undo the move for the next one. Changes the handler.
-            m.undo();
+            handler.undo(m);
 
             //Checks if the value of the childnode is such that changes are necessary to alpha and beta
             if (recursiveCall < beta) {
@@ -121,9 +124,10 @@ public class AlphaBetaPlayer extends Player {
 
     private int alphaBetaMax(ChessNode node, int alpha, int beta, int depth, int maxSearchDepth)
             throws AITimeLimitExceededException {
+        System.err.println("depth: " + depth);
         //Stop if maximum running time is exceeded.
         if (System.currentTimeMillis()- startTime > maxRunningTime) {
-            //throw new AITimeLimitExceededException();
+            throw new AITimeLimitExceededException();
         }
 
         Handler handler = node.getHandler();
@@ -145,7 +149,7 @@ public class AlphaBetaPlayer extends Player {
         //while there are still moves to evaluate
         for (Move m : moves) {
             //get the state that corresponds to the move that we are going to evaluate
-            m.execute(); //changes the handler
+            handler.execute(m); //changes the handler
             ChessNode newNode = new ChessNode(handler.deepCopy());
             //check the child nodes and set the best move accordingly
             int recursiveCall;
@@ -155,7 +159,7 @@ public class AlphaBetaPlayer extends Player {
                 recursiveCall = alphaBetaMin(newNode, alpha, beta, depth + 1, maxSearchDepth);
             }
             //undo the move again to make sure the state is ready for the next one
-            m.undo();
+            handler.undo(m);
 
             //check if the value of the child node is such that changes are necessary to alpha or beta.
             if (recursiveCall > alpha) {

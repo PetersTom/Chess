@@ -30,12 +30,12 @@ public abstract class Piece {
     private boolean moved; //whether or not this piece has already moved. Used for castling check.
     int pieceValue; //A value for the piece, used in calculating the value of a certain position
 
-    public Piece(ChessPosition p, ChessColor c, int standardCellWidth, Engine e) {
+    public Piece(ChessPosition p, ChessColor c, int standardCellWidth, Engine e, Handler h) {
         this.position = p;
         this.color = c;
         this.cellWidth = standardCellWidth;
         this.e = e;
-        this.handler = e.getHandler();
+        this.handler = h;
         this.canvas = e.getCanvas();
     }
 
@@ -43,7 +43,7 @@ public abstract class Piece {
         return this.pieceValue;
     }
 
-    public abstract Piece copy();
+    public abstract Piece copy(Handler h);
 
     public ChessColor getColor() {
         return this.color;
@@ -70,11 +70,11 @@ public abstract class Piece {
         Set<Move> movesWithoutCheck = new HashSet<>();
         King thisKing = handler.getKing(this.getColor());
         for (Move m : possibleMoves) {
-            m.tryMove();
+            handler.tryMove(m);
             if (!thisKing.isChecked()) {
                 movesWithoutCheck.add(m);
             }
-            m.unTryMove();
+            handler.unTryMove(m);
         }
         return movesWithoutCheck;
     }
@@ -99,5 +99,10 @@ public abstract class Piece {
 
     public void moveTo(ChessPosition p) {
         this.position = p;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getName() + " " + this.getPosition().toString();
     }
 }

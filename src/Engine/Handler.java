@@ -2,11 +2,7 @@ package Engine;
 
 import GUI.ChessCanvas;
 import Players.Move;
-import pieces.ChessColor;
-import pieces.ChessPosition;
-import pieces.King;
-import pieces.Piece;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import pieces.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -186,17 +182,38 @@ public class Handler {
      * @return
      */
     public synchronized Handler deepCopy() {
+        Handler handlerCopy = new Handler(e);
         Set<Piece> piecesCopy = Collections.synchronizedSet(new HashSet<>());
         for (Piece p : pieces) {
-            piecesCopy.add(p.copy());
+            Piece copy = p.copy(handlerCopy);
+            piecesCopy.add(copy);
         }
-        Handler handlerCopy = new Handler(e);
         handlerCopy.setPieces(piecesCopy);
-        handlerCopy.whitePlayerMoves = this.whitePlayerMoves;
-        handlerCopy.whitePlayerMovesWithCheck = this.whitePlayerMovesWithCheck;
-        handlerCopy.blackPlayerMoves = this.blackPlayerMoves;
-        handlerCopy.blackPlayerMovesWithCheck = this.blackPlayerMovesWithCheck;
+        //update lastmove. first find the new piece on the end position (lastmove is already executed
+        if (!lastMove.isExecuted()) {
+            throw new IllegalArgumentException("lastMove is not yet executed");
+        }
+        Piece p = handlerCopy.getPiece(lastMove.getEndPosition());
+        handlerCopy.lastMove = lastMove.copy(handlerCopy, p);
+
+        //updateMoves requires lastMove to be set correctly as it is used by pawns figuring out their moves.
+        handlerCopy.updateMoves();
+
+//        e.getHandler().copy(handlerCopy);
+//        e.getCanvas().requestBoardRepaint();
         return handlerCopy;
+    }
+
+    /**
+     * copies a handler object into another handler object
+     */
+    public synchronized void copy(Handler h) {
+        this.pieces = h.pieces;
+        this.blackPlayerMovesWithCheck = h.blackPlayerMovesWithCheck;
+        this.blackPlayerMoves = h.blackPlayerMoves;
+        this.whitePlayerMovesWithCheck = h.whitePlayerMovesWithCheck;
+        this.whitePlayerMoves = h.whitePlayerMoves;
+        this.lastMove = h.lastMove;
     }
 
     /**
@@ -223,7 +240,7 @@ public class Handler {
     }
 
     public void undoLastMove() {
-        lastMove.undo();
+        lastMove.undo(this);
     }
 
     public void setLastMove(Move m) {
@@ -232,5 +249,21 @@ public class Handler {
 
     public Move getLastMove() {
         return this.lastMove;
+    }
+
+    public void execute(Move m) {
+        m.execute(this);
+    }
+
+    public void undo(Move m) {
+        m.undo(this);
+    }
+
+    public void tryMove(Move m) {
+        m.tryMove(this);
+    }
+
+    public void unTryMove(Move m) {
+        m.unTryMove(this);
     }
 }

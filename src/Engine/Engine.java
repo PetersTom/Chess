@@ -142,29 +142,30 @@ public class Engine implements Runnable {
     private void initializeGame() {
         whitePlayer = new HumanPlayer(ChessColor.White, this);
         blackPlayer = new AlphaBetaPlayer(ChessColor.Black, this);
-        handler.addPiece(new Rook(new ChessPosition(1,1, canvas), ChessColor.White, standardCellWidth, this));
-        handler.addPiece(new Rook(new ChessPosition(8, 1, canvas), ChessColor.White, standardCellWidth, this));
-        handler.addPiece(new Knight(new ChessPosition(2, 1, canvas), ChessColor.White, standardCellWidth, this));
-        handler.addPiece(new Knight(new ChessPosition(7, 1, canvas), ChessColor.White, standardCellWidth, this));
-        handler.addPiece(new Bishop(new ChessPosition(3, 1, canvas), ChessColor.White, standardCellWidth, this));
-        handler.addPiece(new Bishop(new ChessPosition(6, 1, canvas), ChessColor.White, standardCellWidth, this));
-        handler.addPiece(new King(new ChessPosition(5, 1, canvas), ChessColor.White, standardCellWidth, this));
-        handler.addPiece(new Queen(new ChessPosition(4, 1, canvas), ChessColor.White, standardCellWidth, this));
+        handler.addPiece(new Rook(new ChessPosition(1,1, canvas), ChessColor.White, standardCellWidth, this, handler));
+        handler.addPiece(new Rook(new ChessPosition(8, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
+        handler.addPiece(new Knight(new ChessPosition(2, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
+        handler.addPiece(new Knight(new ChessPosition(7, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
+        handler.addPiece(new Bishop(new ChessPosition(3, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
+        handler.addPiece(new Bishop(new ChessPosition(6, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
+        handler.addPiece(new King(new ChessPosition(5, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
+        handler.addPiece(new Queen(new ChessPosition(4, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
         for (int i = 1; i <= 8; i++) {
-            handler.addPiece(new Pawn(new ChessPosition(i, 2, canvas), ChessColor.White, standardCellWidth, this));
+            handler.addPiece(new Pawn(new ChessPosition(i, 2, canvas), ChessColor.White, standardCellWidth, this, handler));
         }
-        handler.addPiece(new Rook(new ChessPosition(1,8, canvas), ChessColor.Black, standardCellWidth, this));
-        handler.addPiece(new Rook(new ChessPosition(8, 8, canvas), ChessColor.Black, standardCellWidth, this));
-        handler.addPiece(new Knight(new ChessPosition(2, 8, canvas), ChessColor.Black, standardCellWidth, this));
-        handler.addPiece(new Knight(new ChessPosition(7, 8, canvas), ChessColor.Black, standardCellWidth, this));
-        handler.addPiece(new Bishop(new ChessPosition(3, 8, canvas), ChessColor.Black, standardCellWidth, this));
-        handler.addPiece(new Bishop(new ChessPosition(6, 8, canvas), ChessColor.Black, standardCellWidth, this));
-        handler.addPiece(new King(new ChessPosition(5, 8, canvas), ChessColor.Black, standardCellWidth, this));
-        handler.addPiece(new Queen(new ChessPosition(4, 8, canvas), ChessColor.Black, standardCellWidth, this));
+        handler.addPiece(new Rook(new ChessPosition(1,8, canvas), ChessColor.Black, standardCellWidth, this, handler));
+        handler.addPiece(new Rook(new ChessPosition(8, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
+        handler.addPiece(new Knight(new ChessPosition(2, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
+        handler.addPiece(new Knight(new ChessPosition(7, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
+        handler.addPiece(new Bishop(new ChessPosition(3, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
+        handler.addPiece(new Bishop(new ChessPosition(6, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
+        handler.addPiece(new King(new ChessPosition(5, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
+        handler.addPiece(new Queen(new ChessPosition(4, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
         for (int i = 1; i <= 8; i++) {
-            handler.addPiece(new Pawn(new ChessPosition(i, 7, canvas), ChessColor.Black, standardCellWidth, this));
+            handler.addPiece(new Pawn(new ChessPosition(i, 7, canvas), ChessColor.Black, standardCellWidth, this, handler));
         }
         handler.updateMoves();
+        canvas.requestBoardRepaint();//to start of
         start();
     }
 
@@ -178,7 +179,6 @@ public class Engine implements Runnable {
         while(true) {
             if (hasToStop) break; //It should stop when it needs to.
             //do a repaint
-            canvas.requestBoardRepaint();
             canvas.repaint();
             if (!playerThreadRunning) { //check if the player thread is already running
                 if (handler.isWhiteToMove()) {
@@ -196,10 +196,8 @@ public class Engine implements Runnable {
             } else {
                 m = blackPlayer.fetchMove();
             }
-
             if (m != null) { //if there is a move
-
-                m.execute(); //execute it
+                handler.execute(m); //execute it
 
                 canvas.requestBoardRepaint(); //a piece has moved, so the pieces should be redrawn
 
