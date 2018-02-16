@@ -49,8 +49,11 @@ public class PawnPromotion extends Move {
 
     @Override
     public Move copy(Handler h, Piece p) {
-        PawnPromotion copy = (PawnPromotion)super.copy(h, p);
-        copy.toPromoteTo = h.getPiece(end);
-        return copy;
+        //not needed to copy the move before this one, as that would trigger a butterfly affect rippling down every lastMove.
+        PawnPromotion copyMove = new PawnPromotion(p, this.end, h.getPiece(end), this.e, null, h.getPiece(end));
+        copyMove.start = this.start;
+        copyMove.alreadyMoved = this.alreadyMoved;
+        copyMove.toPromoteTo = h.getPiece(end);
+        return copyMove;
     }
 }

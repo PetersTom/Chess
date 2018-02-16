@@ -65,12 +65,15 @@ public class Castling extends Move {
 
     @Override
     public Move copy(Handler h, Piece p) {
-        Castling copy = (Castling)super.copy(h, p);
-        copy.rook = (Rook)h.getPiece(start2);
-        copy.start2 = this.start2;
-        copy.end2 = this.end2;
-        copy.rookAlreadyMoved = this.rookAlreadyMoved;
-        return copy;
+        //not needed to copy the move before this one, as that would trigger a butterfly affect rippling down every lastMove.
+        Castling copyMove = new Castling((King)p, this.end, (Rook)h.getPiece(end2), this.end2, this.e, null);
+        copyMove.start = this.start;
+        copyMove.alreadyMoved = this.alreadyMoved;
+        copyMove.rook = (Rook)h.getPiece(start2);
+        copyMove.start2 = this.start2;
+        copyMove.end2 = this.end2;
+        copyMove.rookAlreadyMoved = this.rookAlreadyMoved;
+        return copyMove;
     }
 
 }

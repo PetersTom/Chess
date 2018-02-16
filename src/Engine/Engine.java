@@ -69,16 +69,6 @@ public class Engine implements Runnable {
                 }
             }
         });
-        frame.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                super.keyPressed(e);
-                if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                    if (handler.isLastMove())
-                        handler.undoLastMove();
-                }
-            }
-        });
 
         JPanel chessPanel = new JPanel();
         chessPanel.add(canvas);

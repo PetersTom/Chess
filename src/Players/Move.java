@@ -101,6 +101,8 @@ public class Move {
 
     /**
      * Returns a copy of this, with a different handler and a different piece. This is used when copying the handler.
+     * TODO: This move is already executed when copied. So the piece that is captured is not h.getPiece(end), because that
+     * TODO: would be p. No clue how to copy properly. null should suffice, but it should be changed in subclasses as well.
      */
     public Move copy(Handler h, Piece p) {
         //not needed to copy the move before this one, as that would trigger a butterfly affect rippling down every lastMove.

@@ -46,7 +46,6 @@ public class AlphaBetaPlayer extends Player {
             Move temp = getRandomValidMove(handler); //set the move to be fetched to a random move
             move = temp;
         } else {
-            //TODO: move is not set correctly or something with the fetching is wrong.
             move = bestMove;    //set the move to be fetched to the best move uptill now
         }
     }
@@ -71,10 +70,9 @@ public class AlphaBetaPlayer extends Player {
 
     private int alphaBetaMin(ChessNode node, int alpha, int beta, int depth, int maxSearchDepth)
             throws AITimeLimitExceededException {
-        System.err.println("depth: " + depth);
         //Stop if maximum running time is exceeded.
         if (System.currentTimeMillis()- startTime > maxRunningTime) {
-            throw new AITimeLimitExceededException();
+            //throw new AITimeLimitExceededException();
         }
 
         Handler handler = node.getHandler();
@@ -124,10 +122,9 @@ public class AlphaBetaPlayer extends Player {
 
     private int alphaBetaMax(ChessNode node, int alpha, int beta, int depth, int maxSearchDepth)
             throws AITimeLimitExceededException {
-        System.err.println("depth: " + depth);
         //Stop if maximum running time is exceeded.
         if (System.currentTimeMillis()- startTime > maxRunningTime) {
-            throw new AITimeLimitExceededException();
+            //throw new AITimeLimitExceededException();
         }
 
         Handler handler = node.getHandler();
@@ -181,7 +178,7 @@ public class AlphaBetaPlayer extends Player {
      * @return
      */
     private int evaluate(Handler handler) {
-        //System.err.println("value: " + countPiecesValue(handler));
+        System.err.println("value: " + countPiecesValue(handler));
         return countPiecesValue(handler);
     }
 

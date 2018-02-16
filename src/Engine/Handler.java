@@ -193,6 +193,7 @@ public class Handler {
         if (!lastMove.isExecuted()) {
             throw new IllegalArgumentException("lastMove is not yet executed");
         }
+        //find the piece that corresponds to the move
         Piece p = handlerCopy.getPiece(lastMove.getEndPosition());
         handlerCopy.lastMove = lastMove.copy(handlerCopy, p);
 
@@ -252,18 +253,38 @@ public class Handler {
     }
 
     public void execute(Move m) {
+        if (!this.pieces.contains(m.getPiece())) { //this handler does not contain the piece.
+            Piece p = this.getPiece(m.getPiece().getPosition());
+            if (p != null) { //if this handler does contain a piece on that spot, correct the move with the correct piece
+                             //I know that this is a dirty fix. The wrong piece has something to do with the handler copying
+                             //the last move. I have absolutely no clue what the problem is.
+                m = m.copy(this, p);
+            } else {
+                throw new IllegalArgumentException("this handler does not contain a piece on that position");
+            }
+        }
         m.execute(this);
     }
 
     public void undo(Move m) {
+        if (!this.pieces.contains(m.getPiece())) { //this handler does not contain the piece.
+            Piece p = this.getPiece(m.getPiece().getPosition());
+            if (p != null) { //same holds as for the execute method
+                m = m.copy(this, p);
+            } else {
+                throw new IllegalArgumentException("this handler does not contain a piece on that position");
+            }
+        }
         m.undo(this);
     }
 
     public void tryMove(Move m) {
+        if (!this.pieces.contains(m.getPiece())) throw new IllegalArgumentException("This handler cannot execute this move");
         m.tryMove(this);
     }
 
     public void unTryMove(Move m) {
+        if (!this.pieces.contains(m.getPiece())) throw new IllegalArgumentException("This handler cannot execute this move");
         m.unTryMove(this);
     }
 }
