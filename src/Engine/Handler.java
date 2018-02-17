@@ -218,7 +218,7 @@ public class Handler {
         return this.lastMove;
     }
 
-    public synchronized void execute(Move m) {
+    public synchronized void execute(Move m, boolean boardRedrawRequired) {
         if (m.isExecuted()) throw new IllegalArgumentException();
         m.setExecuted(true);
         ChessPosition start = m.getStartPosition();
@@ -245,6 +245,14 @@ public class Handler {
         }
         this.setLastMove(m);
         this.changeTurn();
+        if (boardRedrawRequired) {  //board redraw is done here instead of after an execute in run() of the engine to avoid
+                                    //threading issues where the other player is already trying things out and moving pieces
+                                    //before the redraw has happened. This will result in a redraw with pieces in undefined places.
+                                    //This issue won't arise here, because this method is synchronised, so the other player
+                                    //will have to wait for the board to finish drawing.
+            e.getCanvas().requestBoardRepaint();
+            e.getCanvas().repaint();
+        }
     }
 
     public synchronized void undo(Move m) {

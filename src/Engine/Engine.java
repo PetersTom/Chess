@@ -141,7 +141,7 @@ public class Engine implements Runnable {
 
     private void initializeGame() {
         whitePlayer = new HumanPlayer(ChessColor.White, this);
-        blackPlayer = new HumanPlayer(ChessColor.Black, this);
+        blackPlayer = new AlphaBetaPlayer(ChessColor.Black, this);
         canvas.requestBoardRepaint();//to start with a painted board.
         start();
     }
@@ -174,9 +174,7 @@ public class Engine implements Runnable {
                 m = blackPlayer.fetchMove();
             }
             if (m != null) { //if there is a move
-                handler.execute(m); //execute it
-
-                canvas.requestBoardRepaint(); //a piece has moved, so the pieces should be redrawn
+                handler.execute(m, true); //execute it
 
                 try { //try joining the player thread, as it has executed his job
                     playerThread.join();

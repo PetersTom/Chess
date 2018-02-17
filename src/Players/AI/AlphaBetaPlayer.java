@@ -94,7 +94,7 @@ public class AlphaBetaPlayer extends Player {
         //while there are still moves to evaluate
         for (Move m : moves) {
             //get the state that corresponds to the move that we are going to evaluate
-            handler.execute(m); //changes the handler
+            handler.execute(m, false); //changes the handler
             ChessNode newNode = new ChessNode(handler.clone());  //make a new node with a copy of the handler
             //check the child nodes and set the best move accordingly
             int recursiveCall;
@@ -146,7 +146,7 @@ public class AlphaBetaPlayer extends Player {
         //while there are still moves to evaluate
         for (Move m : moves) {
             //get the state that corresponds to the move that we are going to evaluate
-            handler.execute(m); //changes the handler
+            handler.execute(m, false); //changes the handler
             ChessNode newNode = new ChessNode(handler.clone());
             //check the child nodes and set the best move accordingly
             int recursiveCall;
@@ -187,7 +187,9 @@ public class AlphaBetaPlayer extends Player {
         int totalValue = 0;
         for (Piece[] row : pieces) {
             for (Piece p : row) {
-                totalValue += p.getPieceValue();
+                if (p != null) {
+                    totalValue += p.getPieceValue();
+                }
             }
         }
         return totalValue;

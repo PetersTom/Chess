@@ -58,7 +58,7 @@ public abstract class Piece {
         Set<Move> movesWithoutCheck = new HashSet<>();
         King thisKing = handler.getKing(this.getColor());
         for (Move m : possibleMoves) {
-            handler.execute(m);
+            handler.execute(m, false);
             if (!thisKing.isChecked(handler.getKingPosition(this.getColor()))) {
                 movesWithoutCheck.add(m);
             }
