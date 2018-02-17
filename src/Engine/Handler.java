@@ -1,66 +1,111 @@
 package Engine;
 
 import GUI.ChessCanvas;
+import Players.Castling;
 import Players.Move;
+import Players.PawnPromotion;
 import pieces.*;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.awt.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Handles all the game objects
  */
 public class Handler {
     //needs to be volatile, because both the game loop and window updates can access at the same time.
-    volatile private Set<Piece> pieces;
+    //This array contains all the pieces. It's ordering is from 1 to 8 on the x axis and 1 to 8 on the y axis, viewed
+    //from white's perspective. (1,1) would be the white rook in the starting position
+    volatile private Piece[][] pieces =  new Piece[Engine.CELL_AMOUNT+1][Engine.CELL_AMOUNT+1];
     private boolean whiteTurn = true;
+
+    //Whether or not castlings are possible (only based on movement of king and rook)
+    private boolean[] castlingsPossible = {true, true, true, true};
 
     private ChessCanvas canvas;
     private Engine e;
-
-    //to be updated after every move. To prevent continuous fetching of moves.
-    private Set<Move> whitePlayerMoves; //every move of the white player
-    private Set<Move> blackPlayerMoves;
-    private Set<Move> whitePlayerMovesWithCheck; //every valid move of the white player (that will not result in check)
-    private Set<Move> blackPlayerMovesWithCheck;
-
     private Move lastMove; //used for en-passent
 
     public Handler(Engine e) {
         this.e = e;
-        pieces = Collections.synchronizedSet(new HashSet<>());
         canvas = e.getCanvas();
+        initializePieces();
     }
 
-    public synchronized void addPiece(Piece p) {
-        pieces.add(p);
+    public Handler(Handler h) {
+        this.e = h.e;
+        this.canvas = h.canvas;
+        this.pieces = h.pieces;
+        this.whiteTurn = h.whiteTurn;
+        this.castlingsPossible = h.castlingsPossible;
+        this.lastMove = h.lastMove;
     }
 
-    public synchronized void removePiece(Piece p) {
-        pieces.remove(p);
+    public synchronized void initializePieces() {
+        addPiece(new Rook(ChessColor.White, e,this), new ChessPosition(1,1, canvas));
+        addPiece(new Rook( ChessColor.White, e,this), new ChessPosition(8, 1, canvas));
+        addPiece(new Knight( ChessColor.White, e,this), new ChessPosition(2, 1, canvas));
+        addPiece(new Knight( ChessColor.White, e,this), new ChessPosition(7, 1, canvas));
+        addPiece(new Bishop( ChessColor.White, e,this), new ChessPosition(3, 1, canvas));
+        addPiece(new Bishop( ChessColor.White, e,this), new ChessPosition(6, 1, canvas));
+        addPiece(new King( ChessColor.White, e,this), new ChessPosition(5, 1, canvas));
+        addPiece(new Queen( ChessColor.White, e,this), new ChessPosition(4, 1, canvas));
+        for (int i = 1; i <= 8; i++) {
+            addPiece(new Pawn( ChessColor.White, e,this), new ChessPosition(i, 2, canvas));
+        }
+        addPiece(new Rook(ChessColor.Black, e,this), new ChessPosition(1,8, canvas));
+        addPiece(new Rook( ChessColor.Black, e, this), new ChessPosition(8, 8, canvas));
+        addPiece(new Knight( ChessColor.Black, e,this), new ChessPosition(2, 8, canvas));
+        addPiece(new Knight( ChessColor.Black, e,this), new ChessPosition(7, 8, canvas));
+        addPiece(new Bishop( ChessColor.Black, e,this), new ChessPosition(3, 8, canvas));
+        addPiece(new Bishop( ChessColor.Black, e,this), new ChessPosition(6, 8, canvas));
+        addPiece(new King( ChessColor.Black, e,this), new ChessPosition(5, 8, canvas));
+        addPiece(new Queen( ChessColor.Black, e,this), new ChessPosition(4, 8, canvas));
+        for (int i = 1; i <= 8; i++) {
+            addPiece(new Pawn( ChessColor.Black, e,this), new ChessPosition(i, 7, canvas));
+        }
+    }
+
+    public synchronized void addPiece(Piece p, ChessPosition l) {
+        pieces[l.x][l.y] = p;
+    }
+
+    public synchronized void removePiece(ChessPosition l) {
+        pieces[l.x][l.y] = null;
     }
 
     public synchronized Piece getPiece(ChessPosition position) {
-        Optional<Piece> piece = pieces.stream().filter(p -> p.getPosition().equals(position)).findFirst();
-        return piece.orElse(null);
+        return getPiece(position.x, position.y);
     }
 
     public Piece getPiece(int x, int y) {
-        return getPiece(new ChessPosition(x, y, canvas));
+        if (x > Engine.CELL_AMOUNT || y > Engine.CELL_AMOUNT || x < 1 || y < 1) {
+            return null; //there are no pieces out of bounds.
+        }
+        return pieces[x][y];
     }
 
     /**
      * Get all pieces.
      */
-    public synchronized Set<Piece> getPieces() {
-        return new HashSet<>(this.pieces);
+    public synchronized Piece[][] getPieces() {
+        return pieces.clone();
     }
 
     /**
      * Get all pieces of a specific color
      */
     public synchronized Set<Piece> getPieces(ChessColor c) {
-        return new HashSet<>(pieces.stream().filter(p -> p.getColor() == c).collect(Collectors.toSet()));
+        Set<Piece> returnSet = new HashSet<>();
+        for (Piece[] row : pieces) {
+            for (Piece p : row) {
+                if (p.getColor() == c) {
+                    returnSet.add(p);
+                }
+            }
+        }
+        return returnSet;
     }
 
     public Set<Piece> getWhitePieces() {
@@ -80,93 +125,50 @@ public class Handler {
     }
 
     public synchronized King getKing(ChessColor c) {
-        if (c == ChessColor.White) {
-            return getWhiteKing();
-        } else {
-            return getBlackKing();
+        for (Piece[] row : pieces) {
+            for (Piece p : row) {
+                if (p instanceof King && p.getColor() == c) {
+                    return (King)p;
+                }
+            }
         }
-    }
-
-    public synchronized King getOppositeColorKing(ChessColor c) {
-        if (c == ChessColor.White) {
-            return getBlackKing();
-        } else {
-            return getWhiteKing();
-        }
+        return null;
     }
 
     public synchronized King getWhiteKing() {
-        Optional<Piece> whiteKing = pieces.stream().filter(p -> (p instanceof King)&&(p.getColor() == ChessColor.White)).findFirst();
-        //return the whiteking, or null if there is none
-        return (King) whiteKing.orElse(null);
+        return getKing(ChessColor.White);
     }
 
     public synchronized King getBlackKing() {
-        Optional<Piece> blackKing = pieces.stream().filter(p -> (p instanceof King)&&(p.getColor() == ChessColor.Black)).findFirst();
-        //return the black king, or null if there is none
-        return (King) blackKing.orElse(null);
+        return getKing(ChessColor.Black);
     }
 
-    /**
-     * Updates the moves for every player. This happens whenever someone executes a move. To prevent continous calculation of the moves.
-     */
-    public synchronized void updateMoves() {
-        whitePlayerMoves = new HashSet<>();
-        blackPlayerMoves = new HashSet<>();
-        whitePlayerMovesWithCheck = new HashSet<>();
-        blackPlayerMovesWithCheck = new HashSet<>();
-        Set<Piece> whitePieces = getPieces(ChessColor.White);
-        for (Piece p : whitePieces) {
-            whitePlayerMoves.addAll(p.getMoves());
-            whitePlayerMovesWithCheck.addAll(p.getMovesWithCheck());
+    public synchronized ChessPosition getKingPosition(ChessColor c) {
+        for (int x = 1; x < pieces.length; x++) {
+            for (int y = 1; y < pieces.length; y++) {
+                Piece king = pieces[x][y];
+                if (king instanceof King && king.getColor() == c) {
+                    return new ChessPosition(x, y, canvas);
+                }
+            }
         }
-        Set<Piece> blackPieces = getPieces(ChessColor.Black);
-        for (Piece p : blackPieces) {
-            blackPlayerMoves.addAll(p.getMoves());
-            blackPlayerMovesWithCheck.addAll((p.getMovesWithCheck()));
-        }
-    }
-    public synchronized void updateMovesWithoutCheck() {
-        whitePlayerMoves = new HashSet<>();
-        blackPlayerMoves = new HashSet<>();
-        Set<Piece> whitePieces = getPieces(ChessColor.White);
-        for (Piece p : whitePieces) {
-            whitePlayerMoves.addAll(p.getMoves());
-        }
-        Set<Piece> blackPieces = getPieces(ChessColor.Black);
-        for (Piece p : blackPieces) {
-            blackPlayerMoves.addAll(p.getMoves());
-        }
+        throw new IllegalStateException("There are no kings to be found.");
     }
 
-    public synchronized Set<Move> getMoves(ChessColor c) {
-        if (c == ChessColor.Black) {
-            return this.blackPlayerMoves;
-        } else {
-            return this.whitePlayerMoves;
-        }
-    }
-    public synchronized Set<Move> getMovesWithCheck(ChessColor c) {
-        if (c == ChessColor.Black) {
-            return this.blackPlayerMovesWithCheck;
-        } else {
-            return this.whitePlayerMovesWithCheck;
-        }
+    public synchronized ChessPosition getBlackKingPosition() {
+        return getKingPosition(ChessColor.Black);
     }
 
-    public synchronized Set<Move> getOppositeColorMoves(ChessColor c) {
-        if (c == ChessColor.Black) {
-            return whitePlayerMoves;
-        } else {
-            return blackPlayerMoves;
-        }
+    public synchronized ChessPosition getWhiteKingPosition() {
+        return getKingPosition(ChessColor.White);
     }
-    public synchronized Set<Move> getOppositeColorMovesWithCheck(ChessColor c) {
-        if (c == ChessColor.Black) {
-            return whitePlayerMovesWithCheck;
-        } else {
-            return blackPlayerMovesWithCheck;
-        }
+
+    public synchronized boolean whiteKingChecked() {
+        return getWhiteKing().isChecked(getWhiteKingPosition());
+    }
+
+    public synchronized boolean blackKingChecked() {
+        return getBlackKing().isChecked(getBlackKingPosition());
     }
 
     /**
@@ -176,64 +178,16 @@ public class Handler {
         whiteTurn = !whiteTurn;
     }
 
-    /**
-     * Returns a new Handler instance. All pieces are copied as well, so that a modification to one of the handler's pieces
-     * does not affect the pieces of the other handler.
-     * @return
-     */
-    public synchronized Handler deepCopy() {
-        Handler handlerCopy = new Handler(e);
-        Set<Piece> piecesCopy = Collections.synchronizedSet(new HashSet<>());
-        for (Piece p : pieces) {
-            Piece copy = p.copy(handlerCopy);
-            piecesCopy.add(copy);
-        }
-        handlerCopy.setPieces(piecesCopy);
-        //update lastmove. first find the new piece on the end position (lastmove is already executed
-        if (!lastMove.isExecuted()) {
-            throw new IllegalArgumentException("lastMove is not yet executed");
-        }
-        //find the piece that corresponds to the move
-        Piece p = handlerCopy.getPiece(lastMove.getEndPosition());
-        handlerCopy.lastMove = lastMove.copy(handlerCopy, p);
-
-        //updateMoves requires lastMove to be set correctly as it is used by pawns figuring out their moves.
-        handlerCopy.updateMoves();
-
-//        e.getHandler().copy(handlerCopy);
-//        e.getCanvas().requestBoardRepaint();
-        return handlerCopy;
-    }
-
-    /**
-     * copies a handler object into another handler object
-     */
-    public synchronized void copy(Handler h) {
-        this.pieces = h.pieces;
-        this.blackPlayerMovesWithCheck = h.blackPlayerMovesWithCheck;
-        this.blackPlayerMoves = h.blackPlayerMoves;
-        this.whitePlayerMovesWithCheck = h.whitePlayerMovesWithCheck;
-        this.whitePlayerMoves = h.whitePlayerMoves;
-        this.lastMove = h.lastMove;
-    }
-
-    /**
-     * A helper method for the deepCopy(). Sets the pieces of the copied handler to the copied pieces
-     */
-    private synchronized void setPieces(Set<Piece> p) {
-        this.pieces = p;
-    }
-
     public synchronized boolean isWhiteToMove() {
         return whiteTurn;
     }
 
     public boolean blackMated() {
-        return getBlackKing().isMated();
+        return getBlackKing().isMated(getBlackKingPosition());
     }
 
     public boolean whiteMated() {
-        return getWhiteKing().isMated();
+        return getWhiteKing().isMated(getWhiteKingPosition());
     }
 
     public boolean isLastMove() {
@@ -241,7 +195,7 @@ public class Handler {
     }
 
     public void undoLastMove() {
-        lastMove.undo(this);
+        this.undo(lastMove);
     }
 
     public void setLastMove(Move m) {
@@ -252,39 +206,149 @@ public class Handler {
         return this.lastMove;
     }
 
-    public void execute(Move m) {
-        if (!this.pieces.contains(m.getPiece())) { //this handler does not contain the piece.
-            Piece p = this.getPiece(m.getPiece().getPosition());
-            if (p != null) { //if this handler does contain a piece on that spot, correct the move with the correct piece
-                             //I know that this is a dirty fix. The wrong piece has something to do with the handler copying
-                             //the last move. I have absolutely no clue what the problem is.
-                m = m.copy(this, p);
-            } else {
-                throw new IllegalArgumentException("this handler does not contain a piece on that position");
+    public synchronized void execute(Move m) {
+        if (m.isExecuted()) throw new IllegalArgumentException();
+        m.setExecuted(true);
+        ChessPosition start = m.getStartPosition();
+        ChessPosition end = m.getEndPosition();
+
+        m.setCastlings(castlingsPossible); //set the state of the castlings before the move was executed.
+        checkAndSetCastlings(m);
+
+        //move piece to new position
+        pieces[end.x][end.y] = pieces[start.x][start.y];
+        //set old position to null
+        pieces[start.x][start.y] = null;
+        if (m instanceof Castling) { //also move the rook
+            ChessPosition rookStart = ((Castling) m).getRookStartPosition();
+            ChessPosition rookEnd = ((Castling) m).getRookEndPosition();
+            pieces[rookEnd.x][rookEnd.y] = pieces[rookStart.x][rookStart.y];
+            pieces[rookStart.x][rookStart.y] = null;
+        } else if (m instanceof PawnPromotion) { //promote the piece
+            pieces[end.x][end.y] = ((PawnPromotion) m).getPromotionPiece();
+        }
+        this.setLastMove(m);
+        this.changeTurn();
+    }
+
+    public synchronized void undo(Move m) {
+        if (!m.isExecuted()) throw new IllegalArgumentException();
+        m.setExecuted(false);
+        ChessPosition start = m.getStartPosition();
+        ChessPosition end = m.getEndPosition();
+        //move piece to old position
+        pieces[start.x][start.y] = pieces[end.x][end.y];
+        pieces[end.x][end.y] = m.getCapturedPiece();
+        if (m instanceof Castling) { //also move the rook back
+            ChessPosition rookStart = ((Castling) m).getRookStartPosition();
+            ChessPosition rookEnd = ((Castling) m).getRookEndPosition();
+            pieces[rookStart.x][rookStart.y] = pieces[rookEnd.x][rookEnd.y]; //move the rook back
+        } else if (m instanceof PawnPromotion) { //place the pawn back
+            pieces[start.x][start.y] = ((PawnPromotion) m).getPawn();
+        }
+
+        castlingsPossible = m.getCastlingsPossible(); //this assumes that the values have been correctly set before the move was executed.
+        this.setLastMove(m);
+        this.changeTurn();
+    }
+
+    public void checkAndSetCastlings(Move m) {
+        ChessPosition start = m.getStartPosition();
+        ChessPosition end = m.getEndPosition();
+        Piece startPiece = getPiece(start);
+        if (startPiece instanceof King) { //king is moving
+            if (startPiece.getColor() == ChessColor.White) { //white king is moving
+                castlingsPossible[0] = false; //no white castlings possible anymore
+                castlingsPossible[1] = false;
+            } else { //black king is moving
+                castlingsPossible[2] = false; //no black castlings possible anymore
+                castlingsPossible[3] = false;
+            }
+        } else if (startPiece instanceof Rook) {
+            if (startPiece.getColor() == ChessColor.White) { //A white rook is moving
+                if (start.equals(new ChessPosition(1, 1, canvas))) { //left white rook is moving
+                    castlingsPossible[1] = false; //no white long castling possible anymore
+                } else if (start.equals(new ChessPosition(8, 1, canvas))) {
+                    castlingsPossible[0] = false; //no white short castling possible anymore
+                }
+            } else { //black rook is moving
+                if (start.equals(new ChessPosition(1, 8, canvas))) { //left black rook is moving
+                    castlingsPossible[3] = false; //no black long castling possible anymore
+                } else if (start.equals(new ChessPosition(8, 8, canvas))) { //right black rook is moving
+                    castlingsPossible[2] = false; //no black short castling possible anymore.
+                }
             }
         }
-        m.execute(this);
     }
 
-    public void undo(Move m) {
-        if (!this.pieces.contains(m.getPiece())) { //this handler does not contain the piece.
-            Piece p = this.getPiece(m.getPiece().getPosition());
-            if (p != null) { //same holds as for the execute method
-                m = m.copy(this, p);
-            } else {
-                throw new IllegalArgumentException("this handler does not contain a piece on that position");
+    /**
+     * Return whether or not a castling is possible. It only checks if rook/king have moved yet.
+     */
+    public boolean whiteShortCastlingPossible() {
+        return castlingsPossible[0];
+    }
+
+    /**
+     * Return whether or not a castling is possible. It only checks if rook/king have moved yet.
+     */
+    public boolean whiteLongCastlingPossible() {
+        return castlingsPossible[1];
+    }
+
+    /**
+     * Return whether or not a castling is possible. It only checks if rook/king have moved yet.
+     */
+    public boolean blackShortCastlingPossible() {
+        return castlingsPossible[3];
+    }
+
+    /**
+     * Return whether or not a castling is possible. It only checks if rook/king have moved yet.
+     */
+    public boolean blackLongCastlingPossible() {
+        return castlingsPossible[2];
+    }
+
+    public synchronized void drawPieces(Graphics g) {
+        for (int x = 1; x < pieces.length; x++) {
+            for (int y = 1; y < pieces.length; y++) {
+                Piece p = pieces[x][y];
+                if (p != null) {
+                    pieces[x][y].draw(g, new ChessPosition(x, y, canvas));
+                }
             }
         }
-        m.undo(this);
     }
 
-    public void tryMove(Move m) {
-        if (!this.pieces.contains(m.getPiece())) throw new IllegalArgumentException("This handler cannot execute this move");
-        m.tryMove(this);
+    public synchronized Set<Move> getOppositeColorMoves(ChessColor c) {
+        Set<Move> moves = new HashSet<>();
+        for (int x = 1; x < pieces.length; x++) {
+            for (int y = 1; y < pieces.length; y++) {
+                Piece p = pieces[x][y];
+                if (p != null) {
+                    if (p.getColor() != c) {
+                        moves.addAll(p.getMoves(new ChessPosition(x, y, canvas)));
+                    }
+                }
+            }
+        }
+        return moves;
     }
 
-    public void unTryMove(Move m) {
-        if (!this.pieces.contains(m.getPiece())) throw new IllegalArgumentException("This handler cannot execute this move");
-        m.unTryMove(this);
+    public synchronized Set<Move> getMovesWithCheck(ChessColor c) {
+        Set<Move> moves = new HashSet<>();
+        for (int x = 1; x < pieces.length; x++) {
+            for (int y = 1; y < pieces.length; y++) {
+                Piece p = pieces[x][y];
+                if (p != null) {
+                    moves.addAll(p.getMovesWithCheck(new ChessPosition(x, y, canvas)));
+                }
+            }
+        }
+        return moves;
+    }
+
+    public Handler clone() {
+        return new Handler(this);
     }
 }

@@ -18,8 +18,8 @@ public class Knight extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public Knight(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
-        super(p, c, cellWidth, e, h);
+    public Knight(ChessColor c, Engine e, Handler h) {
+        super(c, e, h);
         if (wimg == null &&  bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wKnight.png");
@@ -50,15 +50,10 @@ public class Knight extends Piece {
     }
 
     @Override
-    public Piece copy(Handler h) {
-        return new Knight(this.getPosition(), this.getColor(), cellWidth, e, h);
-    }
-
-    @Override
-    public Set<Move> getMoves() {
+    public Set<Move> getMoves(ChessPosition position) {
         Set<ChessPosition> possibleMoves = new HashSet<>();
-        int x = getPosition().x;
-        int y = getPosition().y;
+        int x = position.x;
+        int y = position.y;
         if (x + 2 <= Engine.CELL_AMOUNT && y + 1 <= Engine.CELL_AMOUNT) {
             Piece p = handler.getPiece(x+2, y+1);
             if (p != null) {
@@ -139,6 +134,6 @@ public class Knight extends Piece {
                 possibleMoves.add(new ChessPosition(x - 2, y - 1, canvas));
             }
         }
-        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet());
+        return possibleMoves.stream().map(p -> new Move(position, p, handler.getPiece(p), e, this.handler.getLastMove())).collect(Collectors.toSet());
     }
 }

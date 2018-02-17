@@ -88,7 +88,6 @@ public class Engine implements Runnable {
                 canvas.setLocation(new Point(x, y));
                 canvas.repaint();
                 //update the piece scale
-                handler.getPieces().forEach(p -> p.setCellWidth(newCellWidth));
             }
         });
 
@@ -132,30 +131,7 @@ public class Engine implements Runnable {
     private void initializeGame() {
         whitePlayer = new HumanPlayer(ChessColor.White, this);
         blackPlayer = new AlphaBetaPlayer(ChessColor.Black, this);
-        handler.addPiece(new Rook(new ChessPosition(1,1, canvas), ChessColor.White, standardCellWidth, this, handler));
-        handler.addPiece(new Rook(new ChessPosition(8, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
-        handler.addPiece(new Knight(new ChessPosition(2, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
-        handler.addPiece(new Knight(new ChessPosition(7, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
-        handler.addPiece(new Bishop(new ChessPosition(3, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
-        handler.addPiece(new Bishop(new ChessPosition(6, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
-        handler.addPiece(new King(new ChessPosition(5, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
-        handler.addPiece(new Queen(new ChessPosition(4, 1, canvas), ChessColor.White, standardCellWidth, this, handler));
-        for (int i = 1; i <= 8; i++) {
-            handler.addPiece(new Pawn(new ChessPosition(i, 2, canvas), ChessColor.White, standardCellWidth, this, handler));
-        }
-        handler.addPiece(new Rook(new ChessPosition(1,8, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        handler.addPiece(new Rook(new ChessPosition(8, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        handler.addPiece(new Knight(new ChessPosition(2, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        handler.addPiece(new Knight(new ChessPosition(7, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        handler.addPiece(new Bishop(new ChessPosition(3, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        handler.addPiece(new Bishop(new ChessPosition(6, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        handler.addPiece(new King(new ChessPosition(5, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        handler.addPiece(new Queen(new ChessPosition(4, 8, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        for (int i = 1; i <= 8; i++) {
-            handler.addPiece(new Pawn(new ChessPosition(i, 7, canvas), ChessColor.Black, standardCellWidth, this, handler));
-        }
-        handler.updateMoves();
-        canvas.requestBoardRepaint();//to start of
+        canvas.requestBoardRepaint();//to start with a painted board.
         start();
     }
 

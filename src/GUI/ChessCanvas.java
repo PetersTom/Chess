@@ -19,9 +19,10 @@ public class ChessCanvas extends JPanel {
 
     private Color darkBrown = new Color(139,69,19);
     private Color lightBrown = new Color(245,222,179);
-    private int cellWidth = 100;
+    public static int cellWidth = 100;
     private Handler handler;
     private Piece selected;
+    private ChessPosition selectedPiecePosition;
 
     private ChessPosition mousePointer; //the pointer on the board pointing to a cell
     private Point mousePosition;    //the actual mouse position
@@ -67,12 +68,7 @@ public class ChessCanvas extends JPanel {
         //draw king red if checked
         drawKingCheck(g);
         //draw the pieces
-        Set<Piece> pieces = new HashSet<>(handler.getPieces()); //to avoid concurrent modification exceptions
-        pieces.forEach(p -> p.draw(g));
-    }
-
-    public int getCellWidth() {
-        return this.cellWidth;
+        handler.drawPieces(g);
     }
 
     public void setMousePointer(ChessPosition mousePointer) {
@@ -95,6 +91,8 @@ public class ChessCanvas extends JPanel {
                 } else {
                     g.setColor(lightBrown);
                 }
+                //This is a square
+                //noinspection SuspiciousNameCombination
                 g.fillRect(x, y, cellWidth, cellWidth);
             }
         }
@@ -112,6 +110,8 @@ public class ChessCanvas extends JPanel {
         g2.setColor(Color.BLUE);
         Stroke oldStroke = g2.getStroke();
         g2.setStroke(new BasicStroke(thickness));
+        //This is a square
+        //noinspection SuspiciousNameCombination
         g.drawRoundRect(p.x, p.y, cellWidth, cellWidth, thickness, thickness);
         g2.setStroke(oldStroke);
     }
@@ -123,13 +123,12 @@ public class ChessCanvas extends JPanel {
     private void drawSelectedPiece(Graphics g) {
         if (mousePosition == null || selected == null) return;
         //Draw over original piece
-        ChessPosition originalPosition = selected.getPosition();
-        if (originalPosition.getColor() == ChessColor.Black) {
+        if (selectedPiecePosition.getColor() == ChessColor.Black) {
             g.setColor(darkBrown);
         } else {
             g.setColor(lightBrown);
         }
-        Point drawPosition = originalPosition.getPositionOnCanvas();
+        Point drawPosition = selectedPiecePosition.getPositionOnCanvas();
         g.fillRect(drawPosition.x, drawPosition.y, cellWidth, cellWidth);
 
         //draw the pointer again over this overlay
@@ -143,7 +142,7 @@ public class ChessCanvas extends JPanel {
         AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setComposite(ac); //set transparency
-        Point drawPoint = selected.getPosition().getPositionOnCanvas();
+        Point drawPoint = this.selectedPiecePosition.getPositionOnCanvas();
         g2d.drawImage(img, drawPoint.x, drawPoint.y, cellWidth, cellWidth, null);
         //change transparency back before drawing the piece at the mousePosition
         alpha = 1;
@@ -158,17 +157,19 @@ public class ChessCanvas extends JPanel {
      */
     private void drawKingCheck(Graphics g) {
         King whiteKing = handler.getWhiteKing();
-        if (whiteKing == null) return;
-        if (whiteKing.isChecked()) {
+        if (whiteKing == null) throw new IllegalStateException("There is no white king.");
+        if (handler.whiteKingChecked()) {
             g.setColor(Color.RED);
-            Point drawPoint = whiteKing.getPosition().getPositionOnCanvas();
+            Point drawPoint = handler.getWhiteKingPosition().getPositionOnCanvas();
             g.fillRect(drawPoint.x, drawPoint.y, cellWidth, cellWidth);
         }
         King blackKing = handler.getBlackKing();
-        if (blackKing == null) return;
-        if (blackKing.isChecked()) {
+        if (blackKing == null) throw new IllegalStateException("There is no black king");
+        if (handler.blackKingChecked()) {
             g.setColor(Color.RED);
-            Point drawPoint = blackKing.getPosition().getPositionOnCanvas();
+            Point drawPoint = handler.getBlackKingPosition().getPositionOnCanvas();
+            //This is a square
+            //noinspection SuspiciousNameCombination
             g.fillRect(drawPoint.x, drawPoint.y, cellWidth, cellWidth);
         }
     }
@@ -179,7 +180,7 @@ public class ChessCanvas extends JPanel {
      */
     private void drawPossibleMoves(Graphics g) {
         if (selected == null) return;
-        Set<Move> moves = selected.getMovesWithCheck();
+        Set<Move> moves = selected.getMovesWithCheck(selectedPiecePosition);
         moves.forEach(m -> drawDot(g, m.getEndPosition()));
     }
 
@@ -196,11 +197,12 @@ public class ChessCanvas extends JPanel {
     }
 
     public void setCellWidth(int cellWidth) {
-        this.cellWidth = cellWidth;
+        ChessCanvas.cellWidth = cellWidth;
     }
 
-    public void setSelectedPiece(Piece p) {
+    public void setSelectedPiece(Piece p, ChessPosition position) {
         this.selected = p;
+        this.selectedPiecePosition = position;
     }
 
     /**

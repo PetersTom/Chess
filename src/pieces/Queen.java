@@ -18,8 +18,8 @@ public class Queen extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public Queen(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
-        super(p, c, cellWidth, e, h);
+    public Queen(ChessColor c, Engine e, Handler h) {
+        super(c, e, h);
         if (wimg == null && bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wQueen.png");
@@ -49,12 +49,6 @@ public class Queen extends Piece {
         }
     }
 
-    @Override
-    public Piece copy(Handler h) {
-        return new Queen(this.getPosition(), this.getColor(), cellWidth, e, h);
-    }
-
-
     /**
      * Continuously making new objects is a lot of overhead, but it is easy to code and insightful, if
      * performance is needed copy the code in bishop and rook to here. The objects are discarded at the end of the method
@@ -64,7 +58,7 @@ public class Queen extends Piece {
      * @return
      */
     @Override
-    public Set<Move> getMoves() {
+    public Set<Move> getMoves(ChessPosition position) {
 //        Set<Move> possibleMoves =  new HashSet<>();
 //        Piece bishop = new Bishop(this.getEndPosition(), this.getColor(), this.cellWidth, e);
 //        possibleMoves.addAll(bishop.getMoves());
@@ -73,8 +67,8 @@ public class Queen extends Piece {
 //        return possibleMoves.stream().map(m -> new Move(this, m.getEndPosition(), handler.getPiece(m.getEndPosition()), e)).collect(Collectors.toSet());
 
         Set<ChessPosition> possibleMoves = new HashSet<>();
-        int x = getPosition().x;
-        int y = getPosition().y;
+        int x = position.x;
+        int y = position.y;
         //Rook moves
         for (int i = x + 1; i <= Engine.CELL_AMOUNT; i++) { //horizontal to the right
             Piece p = handler.getPiece(i, y);
@@ -172,6 +166,6 @@ public class Queen extends Piece {
         }
 
 
-        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet());
+        return possibleMoves.stream().map(p -> new Move(position, p, handler.getPiece(p), e, this.handler.getLastMove())).collect(Collectors.toSet());
     }
 }

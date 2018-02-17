@@ -29,8 +29,8 @@ public class AlphaBetaPlayer extends Player {
         startTime = System.currentTimeMillis();
         Move bestMove = null;
         bestValue = 0;
-        Handler originalHandler = handler.deepCopy();
-        ChessNode node = new ChessNode(handler.deepCopy()); //root of the search tree
+        Handler originalHandler = handler.clone();
+        ChessNode node = new ChessNode(handler.clone()); //root of the search tree
         try {
             bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, 0, maxSearchDepth);
             //store the best move found uptill now
@@ -95,7 +95,7 @@ public class AlphaBetaPlayer extends Player {
         for (Move m : moves) {
             //get the state that corresponds to the move that we are going to evaluate
             handler.execute(m); //changes the handler
-            ChessNode newNode = new ChessNode(handler.deepCopy());  //make a new node with a copy of the handler
+            ChessNode newNode = new ChessNode(handler.clone());  //make a new node with a copy of the handler
             //check the child nodes and set the best move accordingly
             int recursiveCall;
             if (moves.size() == 1) {    //if there is only one move possible, do not count this to the recursion depth
@@ -147,7 +147,7 @@ public class AlphaBetaPlayer extends Player {
         for (Move m : moves) {
             //get the state that corresponds to the move that we are going to evaluate
             handler.execute(m); //changes the handler
-            ChessNode newNode = new ChessNode(handler.deepCopy());
+            ChessNode newNode = new ChessNode(handler.clone());
             //check the child nodes and set the best move accordingly
             int recursiveCall;
             if (moves.size() == 1) { //if there is only one possible move, do not count it to the recursion depth
@@ -183,10 +183,12 @@ public class AlphaBetaPlayer extends Player {
     }
 
     private int countPiecesValue(Handler handler) {
-        Set<Piece> pieces = handler.getPieces(); //no concurrentmodification issues because this method returns a copy
+        Piece[][] pieces = handler.getPieces(); //no concurrentmodification issues because this method returns a copy
         int totalValue = 0;
-        for (Piece p : pieces) {
-            totalValue += p.getPieceValue();
+        for (Piece[] row : pieces) {
+            for (Piece p : row) {
+                totalValue += p.getPieceValue();
+            }
         }
         return totalValue;
     }

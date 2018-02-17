@@ -9,24 +9,12 @@ import pieces.*;
 public class PawnPromotion extends Move {
 
     Piece toPromoteTo;
+    Piece pawn;
 
-    public PawnPromotion(Piece p, ChessPosition end, Piece capture, Engine e, Move previousLastMove, Piece toPromoteTo) {
-        super(p, end, capture, e, previousLastMove);
+    public PawnPromotion(ChessPosition start, ChessPosition end, Piece capture, Engine e, Move previousLastMove, Piece pawn, Piece toPromoteTo) {
+        super(start, end, capture, e, previousLastMove);
         this.toPromoteTo = toPromoteTo;
-    }
-
-    @Override
-    public void execute(Handler handler) {
-        super.execute(handler);
-        handler.removePiece(p);
-        handler.addPiece(toPromoteTo);
-    }
-
-    @Override
-    public void undo(Handler handler) {
-        super.undo(handler);
-        handler.removePiece(toPromoteTo);
-        handler.addPiece(p);
+        this.pawn = pawn;
     }
 
     public String getPromotionType() {
@@ -43,17 +31,11 @@ public class PawnPromotion extends Move {
         }
     }
 
-    public Piece getPromotionPiece() {
-        return this.toPromoteTo;
+    public Piece getPawn() {
+        return this.pawn;
     }
 
-    @Override
-    public Move copy(Handler h, Piece p) {
-        //not needed to copy the move before this one, as that would trigger a butterfly affect rippling down every lastMove.
-        PawnPromotion copyMove = new PawnPromotion(p, this.end, h.getPiece(end), this.e, null, h.getPiece(end));
-        copyMove.start = this.start;
-        copyMove.alreadyMoved = this.alreadyMoved;
-        copyMove.toPromoteTo = h.getPiece(end);
-        return copyMove;
+    public Piece getPromotionPiece() {
+        return this.toPromoteTo;
     }
 }

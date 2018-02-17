@@ -16,8 +16,8 @@ public class Rook extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public Rook(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
-        super(p, c, cellWidth, e, h);
+    public Rook(ChessColor c, Engine e, Handler h) {
+        super(c, e, h);
         if (wimg == null && bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wRook.png");
@@ -48,15 +48,10 @@ public class Rook extends Piece {
     }
 
     @Override
-    public Piece copy(Handler h) {
-        return new Rook(this.getPosition(), this.getColor(), cellWidth, e, h);
-    }
-
-    @Override
-    public Set<Move> getMoves() {
+    public Set<Move> getMoves(ChessPosition position) {
         Set<ChessPosition> possibleMoves = new HashSet<>();
-        int x = getPosition().x;
-        int y = getPosition().y;
+        int x = position.x;
+        int y = position.y;
         for (int i = x + 1; i <= Engine.CELL_AMOUNT; i++) { //horizontal to the right
             Piece p = handler.getPiece(i, y);
             if (p != null) {
@@ -101,6 +96,6 @@ public class Rook extends Piece {
             possibleMoves.add(new ChessPosition(x, i, canvas));
         }
 
-        return possibleMoves.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet());
+        return possibleMoves.stream().map(p -> new Move(position, p, handler.getPiece(p), e, this.handler.getLastMove())).collect(Collectors.toSet());
     }
 }

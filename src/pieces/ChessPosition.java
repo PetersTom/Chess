@@ -2,10 +2,12 @@ package pieces;
 
 import java.awt.*;
 import GUI.ChessCanvas;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 
 /**
  * A chessposition ranging from 1 to 8 with 1,1 in the bottom left
  */
+@Immutable
 public class ChessPosition extends Point {
 
     ChessCanvas canvas;
@@ -23,7 +25,7 @@ public class ChessPosition extends Point {
     }
 
     public ChessPosition(double graphicalX, double graphicalY, ChessCanvas canvas) {
-        this((int)graphicalX / canvas.getCellWidth() + 1, CELL_AMOUNT - ((int)graphicalY / canvas.getCellWidth()), canvas);
+        this((int)graphicalX / ChessCanvas.cellWidth + 1, CELL_AMOUNT - ((int)graphicalY / ChessCanvas.cellWidth), canvas);
     }
 
     /**
@@ -31,7 +33,7 @@ public class ChessPosition extends Point {
      * @return
      */
     public Point getPositionOnCanvas() {
-        int cellWidth = canvas.getCellWidth();
+        int cellWidth = ChessCanvas.cellWidth;
         int graphicalX = (this.x-1) * cellWidth;
         int graphicalY = (CELL_AMOUNT - this.y) * cellWidth;
         return new Point(graphicalX, graphicalY);

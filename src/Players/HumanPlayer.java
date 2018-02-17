@@ -42,10 +42,10 @@ public class HumanPlayer extends Player {
             if (clickedPiece == null) return;   //not clicked on a piece
             if (clickedPiece.getColor().equals(this.color)) {//piece of correct color
                 selected = clickedPiece;
-                canvas.setSelectedPiece(selected);
+                canvas.setSelectedPiece(selected, clicked);
             }
         } else {    //there is a piece selected
-            Set<Move> possibleMoves = selected.getMovesWithCheck();
+            Set<Move> possibleMoves = selected.getMovesWithCheck(clicked);
             //There could be multiple possible moves in case of a pawn promotion
             Set<Move> optionalMoves = possibleMoves.stream().filter(m -> m.getEndPosition().equals(clicked)).collect(Collectors.toSet());
             //clicked on a possible move
@@ -57,10 +57,10 @@ public class HumanPlayer extends Player {
                 }
                 move = toReturn;
                 selected = null;
-                canvas.setSelectedPiece(selected);
+                canvas.setSelectedPiece(selected, clicked);
             } else { //clicked on a non-move spot, so place back the piece
                 selected = null;
-                canvas.setSelectedPiece(null);
+                canvas.setSelectedPiece(null, null);
                 return;
             }
         }

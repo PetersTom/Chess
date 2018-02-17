@@ -20,8 +20,8 @@ public class King extends Piece {
     private static Image wimg;
     private static Image bimg;
 
-    public King(ChessPosition p, ChessColor c, int cellWidth, Engine e, Handler h) {
-        super(p, c, cellWidth, e, h);
+    public King(ChessColor c, Engine e, Handler h) {
+        super(c, e, h);
         if (wimg == null && bimg == null) {
             try {
                 URL u = getClass().getClassLoader().getResource("wKing.png");
@@ -50,15 +50,10 @@ public class King extends Piece {
     }
 
     @Override
-    public Piece copy(Handler h) {
-        return new King(this.getPosition(), this.getColor(), cellWidth, e, h);
-    }
-
-    @Override
-    public Set<Move> getMoves() {
+    public Set<Move> getMoves(ChessPosition position) {
         Set<ChessPosition> possiblePositions = new HashSet<>();
-        int x = getPosition().x;
-        int y = getPosition().y;
+        int x = position.x;
+        int y = position.y;
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 Piece p = handler.getPiece(x + i, y + j);   //the king itself is skipped because of the color check
@@ -74,7 +69,7 @@ public class King extends Piece {
         //remove out of bounds
         Stream<ChessPosition> chessPositionStream = possiblePositions.stream().filter(p -> p.x > 0 && p.x <= Engine.CELL_AMOUNT && p.y > 0 && p.y <= Engine.CELL_AMOUNT);
         Set<ChessPosition> possiblePositionsWithinBounds = chessPositionStream.collect(Collectors.toSet());
-        Set<Move> possibleMoves = possiblePositionsWithinBounds.stream().map(m -> new Move(this, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet());
+        Set<Move> possibleMoves = possiblePositionsWithinBounds.stream().map(p -> new Move(position, p, handler.getPiece(p), e, this.handler.getLastMove())).collect(Collectors.toSet());
 
         return possibleMoves;
     }
@@ -84,23 +79,23 @@ public class King extends Piece {
      * @return
      */
     @Override
-    public Set<Move> getMovesWithCheck() {
+    public Set<Move> getMovesWithCheck(ChessPosition position) {
         Set<Move> castlingMoves = new HashSet<>();
         //add castling
         if (this.getColor() == ChessColor.White) {
             Set<ChessPosition> otherMovePositions = getOtherPiecesMovePositions();
-            if (this.getPosition().x == 5 && this.getPosition().y == 1) {   //basePosition
+            if (position.x == 5 && position.y == 1) {   //basePosition
                 Piece p = handler.getPiece(8, 1);   //short castling
                 Rook r;
                 if (p instanceof Rook) {
                     if (handler.getPiece(7, 1) == null && handler.getPiece(6, 1) == null) { //no other pieces
                         r = (Rook) p;
-                        if (!r.hasMoved() && !this.hasMoved()) { //both not moved
-                            if (!isChecked()) { //not checked
+                        if (handler.whiteShortCastlingPossible()) { //both not moved
+                            if (!isChecked(position)) { //not checked
                                 if (!otherMovePositions.contains(new ChessPosition(6,1, canvas))) { //check if going over on on a checked square
                                     if (!otherMovePositions.contains(new ChessPosition(7, 1, canvas))) {
-                                        castlingMoves.add(new Castling(this, new ChessPosition(7, 1, canvas),
-                                                r, new ChessPosition(6, 1, canvas), e, this.handler.getLastMove()));
+                                        castlingMoves.add(new Castling(position, new ChessPosition(7, 1, canvas),
+                                                new ChessPosition(8, 1, canvas), new ChessPosition(6, 1, canvas), e, this.handler.getLastMove()));
                                     }
                                 }
                             }
@@ -111,12 +106,12 @@ public class King extends Piece {
                 if (p instanceof Rook) {
                     if (handler.getPiece(2, 1) == null && handler.getPiece(3, 1) == null && handler.getPiece(4, 1) == null) {   //no pieces in the way
                         r = (Rook) p;
-                        if (!r.hasMoved() && !this.hasMoved()) { //both not moved
-                            if (!isChecked()) { //not checked
+                        if (handler.whiteLongCastlingPossible()) { //both not moved
+                            if (!isChecked(position)) { //not checked
                                 if (!otherMovePositions.contains(new ChessPosition(3, 1, canvas))) {    //not going over a checked square
                                     if (!otherMovePositions.contains(new ChessPosition(4, 1, canvas))) {
-                                        castlingMoves.add(new Castling(this, new ChessPosition(3, 1, canvas),
-                                                    r, new ChessPosition(4, 1, canvas), e, this.handler.getLastMove()));
+                                        castlingMoves.add(new Castling(position, new ChessPosition(3, 1, canvas),
+                                                    new ChessPosition(1, 1, canvas), new ChessPosition(4, 1, canvas), e, this.handler.getLastMove()));
                                     }
                                 }
                             }
@@ -126,18 +121,18 @@ public class King extends Piece {
             }
         } else { //black
             Set<ChessPosition> otherMovePositions = getOtherPiecesMovePositions();
-            if (this.getPosition().x == 5 && this.getPosition().y == 8) { //basePosition
+            if (position.x == 5 && position.y == 8) { //basePosition
                 Piece p = handler.getPiece(8, 8); //short castling
                 Rook r;
                 if (p instanceof Rook) {
                     if (handler.getPiece(7, 8) == null && handler.getPiece(6, 8) == null) { //no other pieces
                         r = (Rook) p;
-                        if (!r.hasMoved() && !this.hasMoved()) {    //both not moved
-                            if (!isChecked()) {
+                        if (handler.blackShortCastlingPossible()) {    //both not moved
+                            if (!isChecked(position)) {
                                 if (!otherMovePositions.contains(new ChessPosition(6, 8, canvas))) {
                                     if (!otherMovePositions.contains(new ChessPosition(7, 8, canvas))) {
-                                        castlingMoves.add(new Castling(this, new ChessPosition(7, 8, canvas),
-                                                r, new ChessPosition(6, 8, canvas), e, this.handler.getLastMove()));
+                                        castlingMoves.add(new Castling(position, new ChessPosition(7, 8, canvas),
+                                                new ChessPosition(8, 8, canvas), new ChessPosition(6, 8, canvas), e, this.handler.getLastMove()));
                                     }
                                 }
                             }
@@ -148,12 +143,12 @@ public class King extends Piece {
                 if (p instanceof Rook) {
                     if (handler.getPiece(2, 8) == null && handler.getPiece(3, 8) == null && handler.getPiece(4, 8) == null) {   //no pieces in the way
                         r = (Rook) p;
-                        if (!r.hasMoved() && !this.hasMoved()) { //both not moved
-                            if (!isChecked()) {
+                        if (handler.blackLongCastlingPossible()) { //both not moved
+                            if (!isChecked(position)) {
                                 if (!otherMovePositions.contains(new ChessPosition(3, 8, canvas))) {
                                     if (!otherMovePositions.contains(new ChessPosition(4, 8, canvas))) {
-                                        castlingMoves.add(new Castling(this, new ChessPosition(3, 8, canvas),
-                                                    r, new ChessPosition(4, 8, canvas), e, this.handler.getLastMove()));
+                                        castlingMoves.add(new Castling(position, new ChessPosition(3, 8, canvas),
+                                                    new ChessPosition(1, 8, canvas), new ChessPosition(4, 8, canvas), e, this.handler.getLastMove()));
                                     }
                                 }
                             }
@@ -162,7 +157,7 @@ public class King extends Piece {
                 }
             }
         }
-        castlingMoves.addAll(super.getMovesWithCheck());
+        castlingMoves.addAll(super.getMovesWithCheck(position));
         return castlingMoves;
     }
 
@@ -175,19 +170,27 @@ public class King extends Piece {
         return handler.getOppositeColorMoves(this.getColor()).stream().map(Move::getEndPosition).collect(Collectors.toSet());
     }
 
-    public boolean isChecked() {
-        Set<Move> otherColorMoves = handler.getOppositeColorMoves(this.getColor()); //these are always up-to-date because Move udpates it every time
+    public boolean isChecked(ChessPosition position) {
+        Set<Move> otherColorMoves = handler.getOppositeColorMoves(this.getColor());
         for (Move m : otherColorMoves) {
-            if (m.getEndPosition().equals(this.getPosition())) {
+            if (m.getEndPosition().equals(position)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean isMated() {
+    public boolean isMated(ChessPosition position) {
         Set<Move> possibleMoves = handler.getMovesWithCheck(this.getColor());
-        if (isChecked() && possibleMoves.isEmpty()) {
+        if (isChecked(position) && possibleMoves.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isStaleMated(ChessPosition position) {
+        Set<Move> possibleMoves = handler.getMovesWithCheck(this.getColor());
+        if (!isChecked(position) && possibleMoves.isEmpty()) {
             return true;
         }
         return false;
