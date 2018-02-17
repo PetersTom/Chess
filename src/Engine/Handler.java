@@ -42,7 +42,7 @@ public class Handler {
         this.pieces = h.pieces.clone();
         this.whiteTurn = h.whiteTurn;
         this.castlingsPossible = h.castlingsPossible.clone();
-        this.lastMove = h.lastMove;
+        this.lastMove = h.lastMove; //not clone, so that all handlers share the same set of moves that are done
     }
 
     /**
@@ -205,7 +205,9 @@ public class Handler {
     }
 
     public void undoLastMove() {
-        this.undo(lastMove);
+        if (lastMove != null) {
+            this.undo(lastMove);
+        }
     }
 
     public void setLastMove(Move m) {
@@ -226,7 +228,9 @@ public class Handler {
         checkAndSetCastlings(m);
         //remove the captured piece
         ChessPosition capturedPiecePosition = m.getCapturedPiecePosition();
-        pieces[capturedPiecePosition.x][capturedPiecePosition.y] = null;
+        if (capturedPiecePosition != null) { //in case of a castling
+            pieces[capturedPiecePosition.x][capturedPiecePosition.y] = null;
+        }
         //move piece to new position
         pieces[end.x][end.y] = pieces[start.x][start.y];
         //set old position to null
@@ -254,11 +258,14 @@ public class Handler {
         pieces[end.x][end.y] = null;
         //put back the captured piece
         ChessPosition capturedPiecePosition = m.getCapturedPiecePosition();
-        pieces[capturedPiecePosition.x][capturedPiecePosition.y] = m.getCapturedPiece();
+        if (capturedPiecePosition != null) { //in case of castling
+            pieces[capturedPiecePosition.x][capturedPiecePosition.y] = m.getCapturedPiece();
+        }
         if (m instanceof Castling) { //also move the rook back
             ChessPosition rookStart = ((Castling) m).getRookStartPosition();
             ChessPosition rookEnd = ((Castling) m).getRookEndPosition();
             pieces[rookStart.x][rookStart.y] = pieces[rookEnd.x][rookEnd.y]; //move the rook back
+            pieces[rookEnd.x][rookEnd.y] = null; //delete the old rook
         } else if (m instanceof PawnPromotion) { //place the pawn back
             pieces[start.x][start.y] = ((PawnPromotion) m).getPawn();
         }
