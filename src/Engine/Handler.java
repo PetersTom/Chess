@@ -30,9 +30,12 @@ public class Handler {
     public Handler(Engine e) {
         this.e = e;
         canvas = e.getCanvas();
-        initializePieces();
+        initialize();
     }
 
+    /**
+     * A copy constructor.
+     */
     public Handler(Handler h) {
         this.e = h.e;
         this.canvas = h.canvas;
@@ -42,7 +45,11 @@ public class Handler {
         this.lastMove = h.lastMove;
     }
 
-    public synchronized void initializePieces() {
+    /**
+     * Initializes the game. To be called on every game start.
+     */
+    public synchronized void initialize() {
+        pieces = new Piece[Engine.CELL_AMOUNT+1][Engine.CELL_AMOUNT+1];
         addPiece(new Rook(ChessColor.White, e,this), new ChessPosition(1,1, canvas));
         addPiece(new Rook( ChessColor.White, e,this), new ChessPosition(8, 1, canvas));
         addPiece(new Knight( ChessColor.White, e,this), new ChessPosition(2, 1, canvas));
@@ -65,6 +72,9 @@ public class Handler {
         for (int i = 1; i <= 8; i++) {
             addPiece(new Pawn( ChessColor.Black, e,this), new ChessPosition(i, 7, canvas));
         }
+        lastMove = null;
+        castlingsPossible = new boolean[]{true, true, true, true};
+        whiteTurn = true;
     }
 
     public synchronized void addPiece(Piece p, ChessPosition l) {

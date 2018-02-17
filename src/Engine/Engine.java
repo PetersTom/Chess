@@ -130,7 +130,7 @@ public class Engine implements Runnable {
 
     private void initializeGame() {
         whitePlayer = new HumanPlayer(ChessColor.White, this);
-        blackPlayer = new AlphaBetaPlayer(ChessColor.Black, this);
+        blackPlayer = new HumanPlayer(ChessColor.Black, this);
         canvas.requestBoardRepaint();//to start with a painted board.
         start();
     }
@@ -175,15 +175,14 @@ public class Engine implements Runnable {
                 }
 
 
-            }
-
-            if (handler.whiteMated()) {
-                JOptionPane.showMessageDialog(getFrame(), "White lost");
-                break;
-            }
-            if (handler.blackMated()) {
-                JOptionPane.showMessageDialog(getFrame(), "Black lost");
-                break;
+                if (handler.whiteMated()) {
+                    JOptionPane.showMessageDialog(getFrame(), "White lost");
+                    return;
+                }
+                if (handler.blackMated()) {
+                    JOptionPane.showMessageDialog(getFrame(), "Black lost");
+                    return;
+                }
             }
         }
     }

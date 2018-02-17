@@ -19,6 +19,7 @@ public class HumanPlayer extends Player {
     ChessCanvas canvas;
     Handler handler;
     Piece selected;
+    private ChessPosition selectedPiecePosition; //the position of the selected piece
 
     public HumanPlayer(ChessColor c, Engine e) {
         super(c, e);
@@ -42,10 +43,11 @@ public class HumanPlayer extends Player {
             if (clickedPiece == null) return;   //not clicked on a piece
             if (clickedPiece.getColor().equals(this.color)) {//piece of correct color
                 selected = clickedPiece;
+                selectedPiecePosition = clicked;
                 canvas.setSelectedPiece(selected, clicked);
             }
         } else {    //there is a piece selected
-            Set<Move> possibleMoves = selected.getMovesWithCheck(clicked);
+            Set<Move> possibleMoves = selected.getMovesWithCheck(selectedPiecePosition);
             //There could be multiple possible moves in case of a pawn promotion
             Set<Move> optionalMoves = possibleMoves.stream().filter(m -> m.getEndPosition().equals(clicked)).collect(Collectors.toSet());
             //clicked on a possible move
