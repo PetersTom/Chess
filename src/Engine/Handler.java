@@ -39,9 +39,9 @@ public class Handler {
     public Handler(Handler h) {
         this.e = h.e;
         this.canvas = h.canvas;
-        this.pieces = h.pieces;
+        this.pieces = h.pieces.clone();
         this.whiteTurn = h.whiteTurn;
-        this.castlingsPossible = h.castlingsPossible;
+        this.castlingsPossible = h.castlingsPossible.clone();
         this.lastMove = h.lastMove;
     }
 
@@ -224,7 +224,9 @@ public class Handler {
 
         m.setCastlings(castlingsPossible); //set the state of the castlings before the move was executed.
         checkAndSetCastlings(m);
-
+        //remove the captured piece
+        ChessPosition capturedPiecePosition = m.getCapturedPiecePosition();
+        pieces[capturedPiecePosition.x][capturedPiecePosition.y] = null;
         //move piece to new position
         pieces[end.x][end.y] = pieces[start.x][start.y];
         //set old position to null
@@ -248,7 +250,11 @@ public class Handler {
         ChessPosition end = m.getEndPosition();
         //move piece to old position
         pieces[start.x][start.y] = pieces[end.x][end.y];
-        pieces[end.x][end.y] = m.getCapturedPiece();
+        //remove piece from old position
+        pieces[end.x][end.y] = null;
+        //put back the captured piece
+        ChessPosition capturedPiecePosition = m.getCapturedPiecePosition();
+        pieces[capturedPiecePosition.x][capturedPiecePosition.y] = m.getCapturedPiece();
         if (m instanceof Castling) { //also move the rook back
             ChessPosition rookStart = ((Castling) m).getRookStartPosition();
             ChessPosition rookEnd = ((Castling) m).getRookEndPosition();
@@ -258,7 +264,7 @@ public class Handler {
         }
 
         castlingsPossible = m.getCastlingsPossible(); //this assumes that the values have been correctly set before the move was executed.
-        this.setLastMove(m);
+        this.setLastMove(m.getPreviousLastMove());
         this.changeTurn();
     }
 

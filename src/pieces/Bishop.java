@@ -104,6 +104,6 @@ public class Bishop extends Piece {
             possibleMoves.add(new ChessPosition(x+i, y-i, canvas));
             i++;
         }
-        return possibleMoves.stream().map(p -> new Move(position, p, handler.getPiece(p), e, this.handler.getLastMove())).collect(Collectors.toSet());
+        return possibleMoves.stream().map(p -> new Move(position, p, handler.getPiece(p), p, e, this.handler.getLastMove())).collect(Collectors.toSet());
     }
 }

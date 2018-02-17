@@ -69,14 +69,13 @@ public class King extends Piece {
         //remove out of bounds
         Stream<ChessPosition> chessPositionStream = possiblePositions.stream().filter(p -> p.x > 0 && p.x <= Engine.CELL_AMOUNT && p.y > 0 && p.y <= Engine.CELL_AMOUNT);
         Set<ChessPosition> possiblePositionsWithinBounds = chessPositionStream.collect(Collectors.toSet());
-        Set<Move> possibleMoves = possiblePositionsWithinBounds.stream().map(p -> new Move(position, p, handler.getPiece(p), e, this.handler.getLastMove())).collect(Collectors.toSet());
+        Set<Move> possibleMoves = possiblePositionsWithinBounds.stream().map(p -> new Move(position, p, handler.getPiece(p), p, e, this.handler.getLastMove())).collect(Collectors.toSet());
 
         return possibleMoves;
     }
 
     /**
-     * The castling moves should be add here to prevent a stackoverflow with continuous checking for the other king
-     * @return
+     * The castling moves should be added here to prevent a stackoverflow with continuous checking for the other king
      */
     @Override
     public Set<Move> getMovesWithCheck(ChessPosition position) {

@@ -10,6 +10,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 public class Move {
     ChessPosition end;    //new position
     Piece capturedPiece; //can be null
+    ChessPosition capturedPiecePosition; //most of the time this will be the same as end, unless it is en-passent
     Engine e;
 
     private boolean[] castlingsPossible = {true, true, true, true};
@@ -20,10 +21,11 @@ public class Move {
 
     private boolean executed; //states whether or not this move has been executed or not
 
-    public Move(ChessPosition start, ChessPosition end, Piece capture, Engine e, Move previousLastMove) {
+    public Move(ChessPosition start, ChessPosition end, Piece capture, ChessPosition capturedPiecePosition, Engine e, Move previousLastMove) {
         this.end = end;
         this.start = start;
         this.capturedPiece = capture;
+        this.capturedPiecePosition = capturedPiecePosition;
         this.e = e;
         this.previousLastMove = previousLastMove;
     }
@@ -48,6 +50,14 @@ public class Move {
         return this.capturedPiece;
     }
 
+    public ChessPosition getCapturedPiecePosition() {
+        return capturedPiecePosition;
+    }
+
+    public Move getPreviousLastMove() {
+        return this.previousLastMove;
+    }
+
     @Override
     public String toString() {
         return this.start + " " + this.end;
@@ -59,7 +69,10 @@ public class Move {
      */
     public void setCastlings(boolean[] b) {
         if (b.length != 4) throw new IllegalArgumentException("The length of the array is not correct.");
-        castlingsPossible = b;
+        for (int i = 0; i < 4; i++) {
+            castlingsPossible[i] = b[i]; //castlingsPossible = b would result in only a pointer to the booleans. We want a copy.
+        }
+
     }
 
     public boolean[] getCastlingsPossible() {

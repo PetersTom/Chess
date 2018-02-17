@@ -12,7 +12,7 @@ public class Castling extends Move {
     ChessPosition rookEnd;
 
     public Castling(ChessPosition kingStart, ChessPosition kingEnd, ChessPosition rookStart, ChessPosition rookEnd, Engine e, Move previousLastMove) {
-        super(kingStart, kingEnd, null, e, previousLastMove);
+        super(kingStart, kingEnd, null, null, e, previousLastMove);
         this.rookEnd = rookEnd;
         this.rookStart = rookStart;
     }

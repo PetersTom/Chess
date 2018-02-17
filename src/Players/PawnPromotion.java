@@ -12,7 +12,7 @@ public class PawnPromotion extends Move {
     Piece pawn;
 
     public PawnPromotion(ChessPosition start, ChessPosition end, Piece capture, Engine e, Move previousLastMove, Piece pawn, Piece toPromoteTo) {
-        super(start, end, capture, e, previousLastMove);
+        super(start, end, capture, end, e, previousLastMove);
         this.toPromoteTo = toPromoteTo;
         this.pawn = pawn;
     }

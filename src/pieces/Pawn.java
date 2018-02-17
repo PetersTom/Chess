@@ -84,14 +84,14 @@ public class Pawn extends Piece {
                 if (handler.getPiece(x+1, y) instanceof Pawn) { //if it is a pawn
                     if (lastMove.getEndPosition().equals(new ChessPosition(x + 1, y, canvas))) {
                         if (lastMove.getStartPosition().equals(new ChessPosition(x + 1, y + 2, canvas))) { //and it did the last move
-                            possibleMoves.add(new Move(position, new ChessPosition(x + 1, y + 1, canvas), handler.getPiece(x + 1, y), e, this.handler.getLastMove()));
+                            possibleMoves.add(new Move(position, new ChessPosition(x + 1, y + 1, canvas), handler.getPiece(x + 1, y), lastMove.getEndPosition(), e, this.handler.getLastMove()));
                         }
                     }
                 }
                 if (handler.getPiece(x-1, y) instanceof Pawn) {
                     if (lastMove.getEndPosition().equals(new ChessPosition(x - 1, y, canvas))) {
                         if (lastMove.getStartPosition().equals(new ChessPosition(x - 1, y + 2, canvas))) {
-                            possibleMoves.add(new Move(position, new ChessPosition(x - 1, y + 1, canvas), handler.getPiece(x - 1, y), e, this.handler.getLastMove()));
+                            possibleMoves.add(new Move(position, new ChessPosition(x - 1, y + 1, canvas), handler.getPiece(x - 1, y), lastMove.getEndPosition(), e, this.handler.getLastMove()));
                         }
                     }
                 }
@@ -124,7 +124,7 @@ public class Pawn extends Piece {
                 if (handler.getPiece(x+1, y) instanceof Pawn) {
                     if (lastMove.getEndPosition().equals(new ChessPosition(x+1, y, canvas))) {
                         if (lastMove.getStartPosition().equals(new ChessPosition(x + 1, y - 2, canvas))) {
-                            possibleMoves.add(new Move(position, new ChessPosition(x + 1, y - 1, canvas), handler.getPiece(x + 1, y), e, this.handler.getLastMove()));
+                            possibleMoves.add(new Move(position, new ChessPosition(x + 1, y - 1, canvas), handler.getPiece(x + 1, y), lastMove.getEndPosition(), e, this.handler.getLastMove()));
                         }
                     }
                 }
@@ -132,7 +132,7 @@ public class Pawn extends Piece {
                     if (lastMove.getEndPosition().equals(new ChessPosition(x - 1, y, canvas))) {
                         if (lastMove.getStartPosition().equals(new ChessPosition(x - 1, y - 2, canvas))) {
                             if (new ChessPosition(x - 1, y - 2, canvas).equals(lastMove.getStartPosition())) {
-                                possibleMoves.add(new Move(position, new ChessPosition(x - 1, y - 1, canvas), handler.getPiece(x - 1, y), e, this.handler.getLastMove()));
+                                possibleMoves.add(new Move(position, new ChessPosition(x - 1, y - 1, canvas), handler.getPiece(x - 1, y), lastMove.getEndPosition(), e, this.handler.getLastMove()));
                             }
                         }
                     }
@@ -148,30 +148,24 @@ public class Pawn extends Piece {
         }
         possibleChessPositions.removeAll(promotions);
         Set<Move> promotionMoves = new HashSet<>();
-        for (ChessPosition p : promotions) {
-            promotionMoves.addAll(getPromotions(p));
+        for (ChessPosition end : promotions) {
+            promotionMoves.addAll(getPromotions(end, position));
         }
-        possibleMoves.addAll(possibleChessPositions.stream().map(m -> new Move(position, m, handler.getPiece(m), e, this.handler.getLastMove())).collect(Collectors.toSet()));
+        possibleMoves.addAll(possibleChessPositions.stream().map(p -> new Move(position, p, handler.getPiece(p), p, e, this.handler.getLastMove())).collect(Collectors.toSet()));
         possibleMoves.addAll(promotionMoves);
         return possibleMoves;
     }
 
-    private Set<Move> getPromotions(ChessPosition p) {
+    private Set<Move> getPromotions(ChessPosition end, ChessPosition start) {
         Queen queen = new Queen(this.getColor(), e, handler);
         Knight knight = new Knight(this.getColor(), e, handler);
         Rook rook = new Rook(this.getColor(), e, handler);
         Bishop bishop = new Bishop(this.getColor(), e, handler);
         Set<Move> promotions = new HashSet<>();
-        ChessPosition start = null;
-        if (p.y == 8) {
-            start = new ChessPosition (p.x, p.y - 1, canvas);
-        } else if (p.y == 1) {
-            start = new ChessPosition(p.x, p.y + 1, canvas);
-        }
-        promotions.add(new PawnPromotion(start, p, handler.getPiece(p), e, this.handler.getLastMove(), this, queen));
-        promotions.add(new PawnPromotion(start, p, handler.getPiece(p), e, this.handler.getLastMove(), this, knight));
-        promotions.add(new PawnPromotion(start, p, handler.getPiece(p), e, this.handler.getLastMove(), this, rook));
-        promotions.add(new PawnPromotion(start, p, handler.getPiece(p), e, this.handler.getLastMove(), this, bishop));
+        promotions.add(new PawnPromotion(start, end, handler.getPiece(end), e, this.handler.getLastMove(), this, queen));
+        promotions.add(new PawnPromotion(start, end, handler.getPiece(end), e, this.handler.getLastMove(), this, knight));
+        promotions.add(new PawnPromotion(start, end, handler.getPiece(end), e, this.handler.getLastMove(), this, rook));
+        promotions.add(new PawnPromotion(start, end, handler.getPiece(end), e, this.handler.getLastMove(), this, bishop));
         return promotions;
     }
 }

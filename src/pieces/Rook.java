@@ -96,6 +96,6 @@ public class Rook extends Piece {
             possibleMoves.add(new ChessPosition(x, i, canvas));
         }
 
-        return possibleMoves.stream().map(p -> new Move(position, p, handler.getPiece(p), e, this.handler.getLastMove())).collect(Collectors.toSet());
+        return possibleMoves.stream().map(p -> new Move(position, p, handler.getPiece(p), p, e, this.handler.getLastMove())).collect(Collectors.toSet());
     }
 }
