@@ -356,7 +356,7 @@ public class Handler {
         for (int x = 1; x < pieces.length; x++) {
             for (int y = 1; y < pieces.length; y++) {
                 Piece p = pieces[x][y];
-                if (p != null) {
+                if (p != null && p.getColor() == c) {
                     moves.addAll(p.getMovesWithCheck(new ChessPosition(x, y, canvas)));
                 }
             }
