@@ -5,9 +5,7 @@ import Players.Move;
 import Players.Player;
 import pieces.ChessColor;
 import pieces.Piece;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.util.Random;
 import java.util.Set;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -16,8 +14,8 @@ import static java.lang.Integer.MIN_VALUE;
 public class AlphaBetaPlayer extends Player {
 
     private int bestValue;
-    private final int maxSearchDepth = 2; //the initial search depth
-    private final long maxRunningTime = 10000; //10 seconds
+    private final int maxInitialSearchDepth = 2; //the initial search depth
+    private final long maxRunningTime = 5000; //2 seconds
     private long startTime;
 
     public AlphaBetaPlayer(ChessColor color, Engine e) {
@@ -31,15 +29,19 @@ public class AlphaBetaPlayer extends Player {
         bestValue = 0;
         Handler originalHandler = handler.clone();
         ChessNode node = new ChessNode(handler.clone()); //root of the search tree
+        int maxSearchDepth = maxInitialSearchDepth;
         try {
-            bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, 0, maxSearchDepth);
-            //store the best move found uptill now
-            bestMove = node.getBestMove();
-            //print some results for debugging purposses
-            System.err.format(
-                    "%s: depth= %2d, best move = %5s, value=%d\n",
-                    this.getClass().getSimpleName(),maxSearchDepth, bestMove, bestValue
-            );
+            while(true) {
+                bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, 0, maxSearchDepth);
+                //store the best move found uptill now
+                bestMove = node.getBestMove();
+                //print some results for debugging purposses
+                System.err.format(
+                        "%s: depth=%2d, best move=%5s, value=%d\n",
+                        this.getClass().getSimpleName(), maxSearchDepth, bestMove, bestValue
+                );
+                maxSearchDepth++; //increase the maximum search depth and try again.
+            }
         } catch (AITimeLimitExceededException e) { /* just here to catch the exception and to stop if needed */ }
 
         if (bestMove == null) { //no move found yet
@@ -72,7 +74,7 @@ public class AlphaBetaPlayer extends Player {
             throws AITimeLimitExceededException {
         //Stop if maximum running time is exceeded.
         if (System.currentTimeMillis()- startTime > maxRunningTime) {
-            //throw new AITimeLimitExceededException();
+            throw new AITimeLimitExceededException();
         }
 
         Handler handler = node.getHandler();
@@ -124,7 +126,7 @@ public class AlphaBetaPlayer extends Player {
             throws AITimeLimitExceededException {
         //Stop if maximum running time is exceeded.
         if (System.currentTimeMillis()- startTime > maxRunningTime) {
-            //throw new AITimeLimitExceededException();
+            throw new AITimeLimitExceededException();
         }
 
         Handler handler = node.getHandler();
