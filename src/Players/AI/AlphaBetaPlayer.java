@@ -6,6 +6,7 @@ import Players.Player;
 import pieces.ChessColor;
 import pieces.Piece;
 
+import javax.swing.text.Position;
 import java.util.Set;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -14,7 +15,7 @@ import static java.lang.Integer.MIN_VALUE;
 public class AlphaBetaPlayer extends Player {
 
     private int bestValue;
-    private final int maxInitialSearchDepth = 2; //the initial search depth
+    private final int maxInitialSearchDepth = 3; //the initial search depth
     private final long maxRunningTime = 5000; //2 seconds
     private long startTime;
 
@@ -87,7 +88,7 @@ public class AlphaBetaPlayer extends Player {
             return MAX_VALUE;
         }
         if (depth >= maxSearchDepth) {
-            return evaluate(handler);
+            return PositionEvaluate.evaluate(handler);
         }
 
         //The minimizing player is always the black player, so only the black player can play at this moment.
@@ -139,7 +140,7 @@ public class AlphaBetaPlayer extends Player {
             return MAX_VALUE;
         }
         if (depth >= maxSearchDepth) {
-            return evaluate(handler);
+            return PositionEvaluate.evaluate(handler);
         }
 
         //get the possible moves, the maximizing player is always white
@@ -172,29 +173,6 @@ public class AlphaBetaPlayer extends Player {
             }
         }
         return alpha;
-    }
-
-    /**
-     * A method that evaluates a given state
-     * @param handler
-     * @return
-     */
-    private int evaluate(Handler handler) {
-        //System.err.println("value: " + countPiecesValue(handler));
-        return countPiecesValue(handler);
-    }
-
-    private int countPiecesValue(Handler handler) {
-        Piece[][] pieces = handler.getPieces(); //no concurrentmodification issues because this method returns a copy
-        int totalValue = 0;
-        for (Piece[] row : pieces) {
-            for (Piece p : row) {
-                if (p != null) {
-                    totalValue += p.getPieceValue();
-                }
-            }
-        }
-        return totalValue;
     }
 
 }

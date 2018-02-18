@@ -97,6 +97,7 @@ public class Engine implements Runnable {
                 int x = (int)(d.getWidth() / 2)-(newCellWidth * 4);
                 int y = (int)(d.getHeight() / 2)-(newCellWidth * 4);
                 canvas.setLocation(new Point(x, y));
+                canvas.requestBoardRepaint();
                 canvas.repaint();
                 //update the piece scale
             }
