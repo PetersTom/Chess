@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Handles all the game objects
  */
-public class Handler {
+public class Handler implements Cloneable {
     //needs to be volatile, because both the game loop and window updates can access at the same time.
     //This array contains all the pieces. It's ordering is from 1 to 8 on the x axis and 1 to 8 on the y axis, viewed
     //from white's perspective. (1,1) would be the white rook in the starting position
@@ -39,7 +39,14 @@ public class Handler {
     public Handler(Handler h) {
         this.e = h.e;
         this.canvas = h.canvas;
-        this.pieces = h.pieces.clone();
+        this.pieces = new Piece[Engine.CELL_AMOUNT+1][Engine.CELL_AMOUNT+1];
+        for (int x = 1; x < this.pieces.length; x++) {
+            for (int y = 1; y < this.pieces.length; y++) {
+                if (h.pieces[x][y] != null) {
+                    this.pieces[x][y] = h.pieces[x][y].clone(this);
+                }
+            }
+        }
         this.whiteTurn = h.whiteTurn;
         this.castlingsPossible = h.castlingsPossible.clone();
         this.lastMove = h.lastMove; //not clone, so that all handlers share the same set of moves that are done
@@ -142,7 +149,7 @@ public class Handler {
                 }
             }
         }
-        return null;
+        throw new IllegalStateException("There is no " + c + " king");
     }
 
     public synchronized King getWhiteKing() {

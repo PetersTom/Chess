@@ -178,7 +178,7 @@ public class AlphaBetaPlayer extends Player {
      * @return
      */
     private int evaluate(Handler handler) {
-        System.err.println("value: " + countPiecesValue(handler));
+        //System.err.println("value: " + countPiecesValue(handler));
         return countPiecesValue(handler);
     }
 

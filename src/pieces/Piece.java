@@ -2,6 +2,7 @@ package pieces;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
  * Because it is immutable, pieces do not know their own positions. This is stored in the handler.
  */
 @Immutable
-public abstract class Piece {
+public abstract class Piece implements Cloneable {
 
     private ChessColor color;
     protected Handler handler;
@@ -80,5 +81,17 @@ public abstract class Piece {
     @Override
     public String toString() {
         return this.getClass().getName();
+    }
+
+    /**
+     * Return a new instance with a different handler.
+     */
+    public Piece clone(Handler h) {
+        try {
+            return this.getClass().getDeclaredConstructor(ChessColor.class, Engine.class, Handler.class).newInstance(this.color, this.e, h);
+        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e1) {
+            e1.printStackTrace();
+        }
+        return null;
     }
 }

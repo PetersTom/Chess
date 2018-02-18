@@ -9,7 +9,6 @@ import pieces.Piece;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -66,7 +65,9 @@ public class ChessCanvas extends JPanel {
         //redraw
         paintField(g);
         //draw king red if checked
-        drawKingCheck(g);
+        paintKingCheck(g);
+        //draw last move
+        paintLastMove(g);
         //draw the pieces
         handler.drawPieces(g);
     }
@@ -77,6 +78,28 @@ public class ChessCanvas extends JPanel {
 
     public void setMousePosition(Point p) {
         this.mousePosition = p;
+    }
+
+    public void paintLastMove(Graphics g) {
+        Move lastMove = handler.getLastMove();
+        if (lastMove == null) return; //do nothing if there is no lastMove
+        Color green = new Color(94, 224, 42);
+        g.setColor(green);
+        Point drawPoint = lastMove.getStartPosition().getPositionOnCanvas();
+        //This is a square
+        //noinspection SuspiciousNameCombination
+        g.fillRect(drawPoint.x, drawPoint.y, cellWidth, cellWidth);
+        g.setColor(Color.black);
+        //noinspection SuspiciousNameCombination
+        g.drawRect(drawPoint.x, drawPoint.y, cellWidth, cellWidth);
+
+        g.setColor(green);
+        drawPoint = lastMove.getEndPosition().getPositionOnCanvas();
+        //noinspection SuspiciousNameCombination
+        g.fillRect(drawPoint.x, drawPoint.y, cellWidth, cellWidth);
+        g.setColor(Color.black);
+        //noinspection SuspiciousNameCombination
+        g.drawRect(drawPoint.x, drawPoint.y, cellWidth, cellWidth);
     }
 
     /**
@@ -94,6 +117,9 @@ public class ChessCanvas extends JPanel {
                 //This is a square
                 //noinspection SuspiciousNameCombination
                 g.fillRect(x, y, cellWidth, cellWidth);
+                g.setColor(Color.black);
+                //noinspection SuspiciousNameCombination
+                g.drawRect(x, y, cellWidth, cellWidth);
             }
         }
     }
@@ -155,7 +181,7 @@ public class ChessCanvas extends JPanel {
      * A helper method that draws a red background if the king is checked.
      * @param g
      */
-    private void drawKingCheck(Graphics g) {
+    private void paintKingCheck(Graphics g) {
         King whiteKing = handler.getWhiteKing();
         if (whiteKing == null) throw new IllegalStateException("There is no white king.");
         if (handler.whiteKingChecked()) {
