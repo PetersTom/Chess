@@ -12,6 +12,7 @@ public class Move {
     Piece capturedPiece; //can be null
     ChessPosition capturedPiecePosition; //most of the time this will be the same as end, unless it is en-passent
     Engine e;
+    int amountOfReversableMovesBeforeThisMove;
 
     private boolean[] castlingsPossible = {true, true, true, true};
 
@@ -79,5 +80,12 @@ public class Move {
         return castlingsPossible;
     }
 
+    public int getAmountOfReversableMovesBeforeThisMove() {
+        return this.amountOfReversableMovesBeforeThisMove;
+    }
+
+    public void setAmountOfReversableMovesBeforeThisMove(int x) {
+        this.amountOfReversableMovesBeforeThisMove = x;
+    }
 
 }

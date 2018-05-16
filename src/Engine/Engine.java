@@ -193,6 +193,10 @@ public class Engine implements Runnable {
                     JOptionPane.showMessageDialog(getFrame(), "Black lost");
                     return;
                 }
+                if (isDraw()) {
+                    JOptionPane.showMessageDialog(getFrame(), "Draw");
+                    return;
+                }
             }
         }
     }
@@ -230,5 +234,16 @@ public class Engine implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isDraw() {
+        if (handler.whiteStaleMated() || handler.blackStaleMated()) {
+            return true;
+        }
+        if (handler.fiftyMoves()) {
+            return true;
+        }
+        //TODO: include threefold repetition.
+        return false;
     }
 }

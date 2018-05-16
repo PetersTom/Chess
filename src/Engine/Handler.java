@@ -20,6 +20,8 @@ public class Handler implements Cloneable {
     volatile private Piece[][] pieces =  new Piece[Engine.CELL_AMOUNT+1][Engine.CELL_AMOUNT+1];
     private boolean whiteTurn = true;
 
+    int amountOfReversableMoves = 0; //to keep track of the fifty move rule
+
     //Whether or not castlings are possible (only based on movement of king and rook)
     private boolean[] castlingsPossible = {true, true, true, true};
 
@@ -50,6 +52,7 @@ public class Handler implements Cloneable {
         this.whiteTurn = h.whiteTurn;
         this.castlingsPossible = h.castlingsPossible.clone();
         this.lastMove = h.lastMove; //not clone, so that all handlers share the same set of moves that are done
+        this.amountOfReversableMoves = h.amountOfReversableMoves;
     }
 
     /**
@@ -82,6 +85,7 @@ public class Handler implements Cloneable {
         lastMove = null;
         castlingsPossible = new boolean[]{true, true, true, true};
         whiteTurn = true;
+        amountOfReversableMoves = 0;
     }
 
     public synchronized void addPiece(Piece p, ChessPosition l) {
@@ -207,6 +211,14 @@ public class Handler implements Cloneable {
         return getWhiteKing().isMated(getWhiteKingPosition());
     }
 
+    public boolean whiteStaleMated() {
+        return getWhiteKing().isStaleMated(getWhiteKingPosition());
+    }
+
+    public boolean blackStaleMated() {
+        return getBlackKing().isStaleMated(getBlackKingPosition());
+    }
+
     public boolean isLastMove() {
         return lastMove != null;
     }
@@ -238,6 +250,16 @@ public class Handler implements Cloneable {
         if (capturedPiecePosition != null) { //in case of a castling
             pieces[capturedPiecePosition.x][capturedPiecePosition.y] = null;
         }
+        m.setAmountOfReversableMovesBeforeThisMove(this.amountOfReversableMoves);
+        if (!(m.getCapturedPiece() != null || pieces[start.x][start.y] instanceof Pawn)) {
+            //a move is reversable iff it is a move by a pieces (except pawns) to an empty target square.
+            //i.e. the complement of all capture moves and all pawn moves.
+            this.amountOfReversableMoves++;
+        } else {
+            this.amountOfReversableMoves = 0; //reset the counter if it was not a reversable move.
+        }
+
+
         //move piece to new position
         pieces[end.x][end.y] = pieces[start.x][start.y];
         //set old position to null
@@ -286,6 +308,7 @@ public class Handler implements Cloneable {
         }
 
         castlingsPossible = m.getCastlingsPossible(); //this assumes that the values have been correctly set before the move was executed.
+        amountOfReversableMoves = m.getAmountOfReversableMovesBeforeThisMove(); // """
         this.setLastMove(m.getPreviousLastMove());
         this.changeTurn();
     }
@@ -384,6 +407,10 @@ public class Handler implements Cloneable {
             }
         }
         return moves;
+    }
+
+    public boolean fiftyMoves() {
+        return amountOfReversableMoves >= 50;
     }
 
     public Handler clone() {

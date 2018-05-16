@@ -6,6 +6,7 @@ import Players.Player;
 import pieces.ChessColor;
 import pieces.Piece;
 
+import javax.sql.rowset.serial.SerialRef;
 import javax.swing.text.Position;
 import java.util.Set;
 
@@ -15,8 +16,8 @@ import static java.lang.Integer.MIN_VALUE;
 public class AlphaBetaPlayer extends Player {
 
     private int bestValue;
-    private final int maxInitialSearchDepth = 3; //the initial search depth
-    private final long maxRunningTime = 5000; //2 seconds
+    private final int maxInitialSearchDepth =2; //the initial search depth
+    private final long maxRunningTime = 5000; //5 seconds
     private long startTime;
 
     public AlphaBetaPlayer(ChessColor color, Engine e) {
@@ -46,10 +47,11 @@ public class AlphaBetaPlayer extends Player {
         } catch (AITimeLimitExceededException e) { /* just here to catch the exception and to stop if needed */ }
 
         if (bestMove == null) { //no move found yet
+            System.err.println("Random move played");
             Move temp = getRandomValidMove(handler); //set the move to be fetched to a random move
             move = temp;
         } else {
-            move = bestMove;    //set the move to be fetched to the best move uptill now
+            move = bestMove;    //set the move to be fetched to the best move uptil now
         }
     }
 
